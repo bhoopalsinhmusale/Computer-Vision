@@ -72,6 +72,25 @@ def ssd(A, B):
     return np.dot(dif, dif)
 
 
+def pearson_correlation(x, y):
+    #x = x.ravel()
+    #y = y.ravel()
+    n = len(x)
+    x_sum = float(np.sum(x))
+    y_sum = float(np.sum(y))
+    x_sq_sum = float(np.sum(np.square(x)))
+    y_sq_sum = float(np.sum(np.square(y)))
+    prd_xy_sum = float(np.sum(np.multiply(x, y)))
+    top = float(prd_xy_sum - ((x_sum * y_sum) / n))
+    bot = float(np.sqrt((x_sq_sum - np.square(x_sum) / n)
+                        * (y_sq_sum - np.square(y_sum) / n)))
+    if bot == 0:
+        return 0
+    else:
+        correlation = top / bot
+        return correlation
+
+
 if __name__ == "__main__":
     '''for i in range(2, 7):
         im_frame = Image.open('I{}.jpg'.format(i))
@@ -105,5 +124,8 @@ if __name__ == "__main__":
     J = np.array(im_frame)
     print(J.shape)
 
-    kal = ssd(I, J)
-    print(kal)
+    #ssd = ssd(I, J)
+    # print(ssd)
+
+    corr = pearson_correlation(I, J)
+    print(corr)
