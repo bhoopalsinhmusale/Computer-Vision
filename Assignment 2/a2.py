@@ -107,4 +107,3 @@ if __name__ == "__main__":
 
     kal = ssd(I, J)
     print(kal)
-    print(kal)
