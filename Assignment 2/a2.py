@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import cv2
 from PIL import Image
+from matplotlib import cm
 
 
 def joint_histogram(I, J, num_bins=16, minmax_range=None):
@@ -32,7 +33,7 @@ def joint_histogram(I, J, num_bins=16, minmax_range=None):
 
     for k in range(n):
         p[I[k], J[k]] = p[I[k], J[k]] + 1
-    print("aaaaaaaa%", np.sum(p))
+    #print("aaaaaaaa%", np.sum(p))
     norma_jhist = p/n
     jhist = p
     return jhist, norma_jhist
@@ -44,8 +45,8 @@ def ssd(A, B):
 
 
 def pearson_correlation(x, y):
-    #x = x.ravel()
-    #y = y.ravel()
+    x = x.ravel()
+    y = y.ravel()
     n = len(x)
     x_sum = float(np.sum(x))
     y_sum = float(np.sum(y))
@@ -63,27 +64,20 @@ def pearson_correlation(x, y):
 
 
 def MI(I, J):
-    n = I.shape[0]
-    _, norm_jhist = joint_histogram(I, J)
-    print("Normalized Joint Histogram={}".format(np.sum(norm_jhist)))
-    # compute marginal histograms
-    jh = jh + EPS
-    sh = np.sum(jh)
-    jh = jh / sh
-    s1 = np.sum(jh, axis=0).reshape((-1, jh.shape[0]))
-    s2 = np.sum(jh, axis=1).reshape((jh.shape[1], -1))
+    jh, _ = joint_histogram(I, J)
 
-    # Normalised Mutual Information of:
-    # Studholme,  jhill & jhawkes (1998).
-    # "A normalized entropy measure of 3-D medical image alignment".
-    # in Proc. Medical Imaging 1998, vol. 3338, San Diego, CA, pp. 132-143.
-    if normalized:
-        mi = ((np.sum(s1 * np.log(s1)) + np.sum(s2 * np.log(s2)))
-              / np.sum(jh * np.log(jh))) - 1
-    else:
-        mi = (np.sum(jh * np.log(jh)) - np.sum(s1 * np.log(s1))
-              - np.sum(s2 * np.log(s2)))
+    pxy = jh / float(np.sum(jh))
+    #print("Normalized Joint Histogram={}".format(np.sum(pxy)))
 
+    px = np.sum(pxy, axis=1)  # marginal for x over y
+    py = np.sum(pxy, axis=0)  # marginal for y over x
+    px_py = px[:, None] * py[None, :]  # Broadcast to multiply marginals
+    # Now we can do the calculation using the pxy, px_py 2D arrays
+    nzs = pxy > 0  # Only non-zero pxy values contribute to the sum
+    mi = np.sum(pxy[nzs] * np.log(pxy[nzs] / px_py[nzs]))
+    return mi
+
+def rigid_transform(theta, omega, phi, p, q, r):
 
 if __name__ == "__main__":
     '''for i in range(2, 7):
@@ -96,7 +90,7 @@ if __name__ == "__main__":
         print(J.shape)
 
         fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(10, 10))
-        my_joint_hist,_ = joint_histogram(I, J, 50)
+        my_joint_hist, _ = joint_histogram(I, J, 50)
         jhist = np.histogram2d(np.ravel(I), np.ravel(J), 50)
         ax1.imshow(np.log(my_joint_hist))
         ax1.set_title("My joint hist")
@@ -109,7 +103,8 @@ if __name__ == "__main__":
         fig.tight_layout()
         print(np.sum(jhist[0]))
         print(np.sum(my_joint_hist))
-        plt.show()'''
+        plt.show()
+
     im_frame = Image.open('I1.png')
     I = np.array(im_frame)
     print(I.shape)
@@ -118,10 +113,22 @@ if __name__ == "__main__":
     J = np.array(im_frame)
     print(J.shape)
 
-    #ssd = ssd(I, J)
-    # print(ssd)
+    ssd = ssd(I, J)
+    print("SSD={}".format(ssd))
 
-    #corr = pearson_correlation(I, J)
-    # print(corr)
+    corr = pearson_correlation(I, J)
+    print("CORR={}".format(corr))
 
-    MI(I, J)
+    mi = MI(I, J)
+    print("MI={}".format(mi))'''
+    fig = plt.figure()
+    ax = fig.add_subplot(projection='3d')
+    a = np.linspace(0, 20, 20)
+    b = np.linspace(0, 20, 20)
+    c = np.linspace(0, 20, 20)
+    x, y, z = np.meshgrid(a, b, c)
+    print(x.shape)
+    ax.scatter(x, y, z, color="black")
+    plt.setp(ax, xticks=[i for i in range(0, 25, 5)],
+             yticks=[i for i in range(0, 25, 5)], zticks=[i for i in range(0, 20, 2)])
+    plt.show()
