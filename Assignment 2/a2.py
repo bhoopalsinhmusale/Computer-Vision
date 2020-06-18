@@ -3,8 +3,6 @@ import nibabel as nib
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
-from PIL import Image
-from matplotlib import cm
 
 
 def joint_histogram(I, J, num_bins=16, minmax_range=None):
@@ -33,7 +31,7 @@ def joint_histogram(I, J, num_bins=16, minmax_range=None):
 
     for k in range(n):
         p[I[k], J[k]] = p[I[k], J[k]] + 1
-    #print("aaaaaaaa%", np.sum(p))
+    # print("aaaaaaaa%", np.sum(p))
     norma_jhist = p/n
     jhist = p
     return jhist, norma_jhist
@@ -67,7 +65,7 @@ def MI(I, J):
     jh, _ = joint_histogram(I, J)
 
     pxy = jh / float(np.sum(jh))
-    #print("Normalized Joint Histogram={}".format(np.sum(pxy)))
+    # print("Normalized Joint Histogram={}".format(np.sum(pxy)))
 
     px = np.sum(pxy, axis=1)  # marginal for x over y
     py = np.sum(pxy, axis=0)  # marginal for y over x
@@ -77,7 +75,66 @@ def MI(I, J):
     mi = np.sum(pxy[nzs] * np.log(pxy[nzs] / px_py[nzs]))
     return mi
 
-def rigid_transform(theta, omega, phi, p, q, r):
+
+def rigid_transform(theta=0, omega=0, phi=0, dx=0, dy=0, dz=0):
+    print("theta={}".format(theta))
+    print("omega={}".format(omega))
+    print("phi={}".format(phi))
+    print("dx={}".format(dx))
+    print("dy={}".format(dy))
+    print("dz={}".format(dz))
+    size = 20
+    a = np.linspace(0, size, size)
+    b = np.linspace(0, size, size)
+    c = np.linspace(0, size, size)
+    x, y, z = np.meshgrid(a, b, c)
+
+    ones = np.ones((size, size, size))
+
+    print(x.shape)
+    print(ones.shape)
+
+    A = np.array([x, y, z, ones]).T
+
+    print(A.shape)
+    # Rotation matrices around the X, Y, and Z axis
+    RX = np.array([[1, 0, 0, 0],
+                   [0, np.cos(theta), -np.sin(theta), 0],
+                   [0, np.sin(theta), np.cos(theta), 0],
+                   [0, 0, 0, 1]])
+
+    RY = np.array([[np.cos(omega), 0, -np.sin(omega), 0],
+                   [0, 1, 0, 0],
+                   [np.sin(omega), 0, np.cos(omega), 0],
+                   [0, 0, 0, 1]])
+
+    RZ = np.array([[np.cos(phi), -np.sin(phi), 0, 0],
+                   [np.sin(phi), np.cos(phi), 0, 0],
+                   [0, 0, 1, 0],
+                   [0, 0, 0, 1]])
+
+    # Composed rotation matrix with (RX, RY, RZ)
+    R = np.dot(np.dot(RX.T, RY.T), RZ.T)
+    # Translation matrix
+    T = np.array([[1, 0, 0, dx],
+                  [0, 1, 0, dy],
+                  [0, 0, 1, dz],
+                  [0, 0, 0, 1]]).T
+
+    final_A = np.dot(A, np.dot(R, T))
+
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 2, 1, projection='3d')
+    ax.scatter(A.T[0, :], A.T[1, :], A.T[2, :], color="black")
+    plt.setp(ax, xticks=[i for i in range(0, 25, 5)],
+             yticks=[i for i in range(0, 25, 5)], zticks=[i for i in range(0, 22, 2)])
+
+    ax = fig.add_subplot(1, 2, 2, projection='3d')
+    ax.scatter(final_A.T[0, :], final_A.T[1, :], final_A.T[2, :], color="Red")
+    plt.setp(ax, xticks=[i for i in range(0, 25, 5)],
+             yticks=[i for i in range(0, 25, 5)], zticks=[i for i in range(0, 22, 2)])
+    plt.show()
+
 
 if __name__ == "__main__":
     '''for i in range(2, 7):
@@ -121,14 +178,5 @@ if __name__ == "__main__":
 
     mi = MI(I, J)
     print("MI={}".format(mi))'''
-    fig = plt.figure()
-    ax = fig.add_subplot(projection='3d')
-    a = np.linspace(0, 20, 20)
-    b = np.linspace(0, 20, 20)
-    c = np.linspace(0, 20, 20)
-    x, y, z = np.meshgrid(a, b, c)
-    print(x.shape)
-    ax.scatter(x, y, z, color="black")
-    plt.setp(ax, xticks=[i for i in range(0, 25, 5)],
-             yticks=[i for i in range(0, 25, 5)], zticks=[i for i in range(0, 20, 2)])
-    plt.show()
+
+    rigid_transform(theta=40, omega=40, phi=40, dx=400, dy=400, dz=400)
