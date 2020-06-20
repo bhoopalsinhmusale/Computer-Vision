@@ -17,12 +17,12 @@ def rigid_transform(theta=0, omega=0, phi=0, dx=0, dy=0, dz=0):
 
     ones = np.ones((size, size, size))
 
-    print(x.shape)
-    print(ones.shape)
+    # print(x.shape)
+    # print(ones.shape)
 
     A = np.array([x, y, z, ones]).T
 
-    print(A.shape)
+    # print(A.shape)
     # Rotation matrices around the X, Y, and Z axis
     RX = np.array([[1, 0, 0, 0],
                    [0, np.cos(theta), -np.sin(theta), 0],
@@ -59,11 +59,12 @@ def rigid_transform(theta=0, omega=0, phi=0, dx=0, dy=0, dz=0):
     ax.scatter(final_A.T[0, :], final_A.T[1, :], final_A.T[2, :], color="Red")
     plt.setp(ax, xticks=[i for i in range(0, 25, 5)],
              yticks=[i for i in range(0, 25, 5)], zticks=[i for i in range(0, 22, 2)])
+    plt.suptitle("Rigid Transform")
     plt.show()
 
 
 def affine_transform(slice=0, theta=0, omega=0, phi=0, dx=0, dy=0, dz=0):
-    print("slice={}".format(theta))
+    print("slice={}".format(slice))
     print("theta={}".format(theta))
     print("omega={}".format(omega))
     print("phi={}".format(phi))
@@ -78,12 +79,12 @@ def affine_transform(slice=0, theta=0, omega=0, phi=0, dx=0, dy=0, dz=0):
 
     ones = np.ones((size, size, size))
 
-    print(x.shape)
-    print(ones.shape)
+    # print(x.shape)
+    # print(ones.shape)
 
     A = np.array([x, y, z, ones]).T
 
-    print(A.shape)
+    # print(A.shape)
     # Rotation matrices around the X, Y, and Z axis
     RX = np.array([[1, 0, 0, 0],
                    [0, np.cos(theta), -np.sin(theta), 0],
@@ -112,6 +113,7 @@ def affine_transform(slice=0, theta=0, omega=0, phi=0, dx=0, dy=0, dz=0):
                   [0, slice, 0, 0],
                   [0, 0, slice, 0],
                   [0, 0, 0, 1]]).T
+
     final_A = np.dot(A, np.dot(S, np.dot(R, T)))
 
     fig = plt.figure()
@@ -124,9 +126,15 @@ def affine_transform(slice=0, theta=0, omega=0, phi=0, dx=0, dy=0, dz=0):
     ax.scatter(final_A.T[0, :], final_A.T[1, :], final_A.T[2, :], color="Red")
     plt.setp(ax, xticks=[i for i in range(0, 25, 5)],
              yticks=[i for i in range(0, 25, 5)], zticks=[i for i in range(0, 22, 2)])
+    plt.suptitle("Affine Transform")
     plt.show()
 
 
 if __name__ == "__main__":
-    affine_transform(slice=0.8, theta=40, omega=40,
-                     phi=40, dx=400, dy=400, dz=400)
+    # Part 3-B
+    rigid_transform(theta=90, omega=0,
+                    phi=0, dx=0, dy=0, dz=0)
+
+    # Part 3-C
+    affine_transform(slice=-20, theta=90, omega=0,
+                     phi=0, dx=0, dy=0, dz=0)
