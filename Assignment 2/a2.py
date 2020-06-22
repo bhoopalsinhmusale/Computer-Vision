@@ -3,12 +3,15 @@ import nibabel as nib
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
+from skimage.io import imread
+from scipy.interpolate import interp2d
+from scipy.interpolate import interpn
+plt.rcParams.update({'font.size': 20})
+
 
 # Part 1(A,B,C)
-
-
-def joint_histogram(I, J, num_bins=16, minmax_range=None):
-
+def joint_histogram(I, J, num_bins=16):
+    minmax_range = None
     if I.shape != J.shape:
         raise AssertionError("The inputs must be the same size.")
 
@@ -34,7 +37,7 @@ def joint_histogram(I, J, num_bins=16, minmax_range=None):
     for k in range(n):
         p[I[k], J[k]] = p[I[k], J[k]] + 1
 
-    print("aaaaaaaa%", np.sum(p))
+    print("Verify n x p={}".format(np.sum(p)))
 
     norma_jhist = p/n
     jhist = p
@@ -47,7 +50,7 @@ def ssd(A, B):
     return np.dot(dif, dif)
 
 
-# Part 2-B(from data mining course)
+# Part 2-B
 def pearson_correlation(x, y):
     x = x.ravel()
     y = y.ravel()
@@ -83,6 +86,7 @@ def MI(I, J):
     return mi
 
 
+# Part 3-A,B
 def rigid_transform(theta=0, omega=0, phi=0, dx=0, dy=0, dz=0):
     print("theta={}".format(theta))
     print("omega={}".format(omega))
@@ -144,6 +148,7 @@ def rigid_transform(theta=0, omega=0, phi=0, dx=0, dy=0, dz=0):
     plt.show()
 
 
+# Part 3-C
 def affine_transform(slice=0, theta=0, omega=0, phi=0, dx=0, dy=0, dz=0):
     print("slice={}".format(slice))
     print("theta={}".format(theta))
@@ -211,54 +216,167 @@ def affine_transform(slice=0, theta=0, omega=0, phi=0, dx=0, dy=0, dz=0):
     plt.show()
 
 
+# Part 4-A
+def translation(I, p=0, q=0):
+    print("P={}".format(p))
+    print("Q={}".format(q))
+
+    img = imread(I)
+    # img = cers[100:300, 100:300]
+    height, width = img.shape
+
+    x = np.linspace(0, height, height)
+    y = np.linspace(0, width, width)
+
+    ones = np.ones(width)
+
+    A = np.array([x, y, ones]).T
+    T = np.array([[1, 0, p],
+                  [0, 1, q],
+                  [0, 0, 1]]).T
+
+    final_img = np.dot(A, T)
+    print("asssssss")
+    print(final_img.T[0, :].shape)
+    f = interp2d(final_img.T[0, :], final_img.T[1, :],
+                 img, kind='cubic', fill_value=0)
+    znew = f(x, y)
+    '''plt.subplot(1, 2, 1)
+    plt.imshow(img)
+    plt.title("Original")
+    plt.subplot(1, 2, 2)
+    plt.imshow(znew)
+    plt.title("Transformed")
+    plt.show()
+    ssd_ = ssd(img, znew)
+    print(ssd_)'''
+    return znew
+
+
+# Part 4-C
+def rotation(I, theta=45):
+    img = imread(I)
+    # img = img[100:300, 100:300]
+    height, width = img.shape
+
+    xs = np.arange(img.shape[0])
+    ys = np.arange(img.shape[1])
+
+    # matrix
+    theta = np.deg2rad(theta)
+    c = np.cos(theta)
+    s = np.sin(theta)
+    m = np.array([[c, -s, 0], [s, c, 0], [0, 0, 1]])
+
+    out = np.array([[m.dot(np.array([x, y, 1])) for y in ys]
+                    for x in xs])[:, :, :-1]
+
+    znew = interpn((xs, ys), img, out, method='nearest',
+                   bounds_error=False, fill_value=0)
+
+    '''plt.subplot(1, 2, 1)
+    plt.imshow(img)
+    plt.title("Original")
+    plt.subplot(1, 2, 2)
+    plt.imshow(znew)
+    plt.title("Transformed")
+    plt.show()'''
+
+    # ssd_ = ssd(img, znew)
+    # print(ssd_)
+    # return znew'''
+    return znew
+
+
 if __name__ == "__main__":
-    # Part 2(SSD,CORR,MI)
-    '''for i in range(2, 7):
-        im_frame = Image.open('I{}.jpg'.format(i))
-        I = np.array(im_frame)
-        print(I.shape)
+    # Part 1(A,B,C)
+    '''img1 = imread("I1.png")
+    # I = np.array(img1)
+    print(img1.shape)
 
-        im_frame = Image.open('J{}.jpg'.format(i))
-        J = np.array(im_frame)
-        print(J.shape)
+    img2 = imread("J1.png")
+    # J = np.array(im_frame)
+    print(img2.shape)
 
-        fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(10, 10))
-        my_joint_hist, _ = joint_histogram(I, J, 50)
-        jhist = np.histogram2d(np.ravel(I), np.ravel(J), 50)
-        ax1.imshow(np.log(my_joint_hist))
-        ax1.set_title("My joint hist")
+    plt.subplot(2, 2, 1)
+    plt.imshow(img1)
+    plt.title("img 1")
 
-        ax2.imshow(np.log(jhist[0]))
-        ax2.set_title("NP joint hist")
-        plt.suptitle("Part 1 \nI{}.jpg".format(i))
-        ax3.imshow(I, "gray")
-        ax4.imshow(J, "gray")
-        fig.tight_layout()
-        print(np.sum(jhist[0]))
-        print(np.sum(my_joint_hist))
-        plt.show()
+    plt.subplot(2, 2, 2)
+    plt.imshow(img2)
+    plt.title("img 2")
 
-    im_frame = Image.open('I1.png')
-    I = np.array(im_frame)
-    print(I.shape)
+    myjh, _ = np.log(joint_histogram(img1, img2))
+    plt.subplot(2, 2, 3)
+    plt.imshow(myjh)
+    plt.title("Joint Histogram")
+    plt.tight_layout()
+    plt.show()
 
-    im_frame = Image.open('J1.png')
-    J = np.array(im_frame)
-    print(J.shape)
+    for i in range(2, 7):
+        img1 = imread('I{}.jpg'.format(i))
+        # img1 = imread("I1.png")
+        # I = np.array(img1)
+        print('I{}.jpg'.format(i))
+        print(img1.shape)
 
-    ssd = ssd(I, J)
-    print("SSD={}".format(ssd))
+        img2 = imread('J{}.jpg'.format(i))
+        # J = np.array(im_frame)
+        print('J{}.jpg'.format(i))
+        print(img2.shape)
 
-    corr = pearson_correlation(I, J)
-    print("CORR={}".format(corr))
+        plt.subplot(2, 2, 1)
+        plt.imshow(img1)
+        plt.title("img 1")
 
-    mi = MI(I, J)
-    print("MI={}".format(mi))'''
+        plt.subplot(2, 2, 2)
+        plt.imshow(img2)
+        plt.title("img 2")
 
-    # Part 3-B
-    rigid_transform(theta=90, omega=0,
+        myjh, _ = np.log(joint_histogram(img1, img2))
+        plt.subplot(2, 2, 3)
+        plt.imshow(myjh)
+        plt.title("Joint Histogram")
+        plt.tight_layout()
+        plt.show()'''
+
+    # Part 2-A,B,C,D
+    '''img1 = imread("I1.png")
+    img2 = imread("J1.png")
+    ssd = ssd(img1, img2)
+    corr = pearson_correlation(img1, img2)
+    mi = MI(img1, img2)
+    print("SSD={} | CORR={} | MI={}".format(ssd, corr, mi))'''
+
+    # Part 3-A,B
+    '''rigid_transform(theta=90, omega=0,
                     phi=0, dx=0, dy=0, dz=0)
 
     # Part 3-C
     affine_transform(slice=-20, theta=90, omega=0,
-                     phi=0, dx=0, dy=0, dz=0)
+                     phi=0, dx=0, dy=0, dz=0)'''
+
+    # Part 4-A
+    '''img = imread("I1.png")
+    plt.subplot(1, 2, 1)
+    plt.imshow(img)
+    plt.title("Original")
+
+    plt.subplot(1, 2, 2)
+    znew = translation("I1.png", p=110, q=110)
+    plt.imshow(znew)
+    plt.title("Transformed")
+    plt.show()
+    rotation("I1.png", 10)'''
+
+    # Part 4-B
+    '''img = imread("I1.png")
+    plt.subplot(1, 2, 1)
+    plt.imshow(img)
+    plt.title("Original")
+
+    znew = rotation("I1.png")
+    plt.subplot(1, 2, 2)
+    plt.imshow(znew)
+    plt.title("Transformed")
+    plt.show()'''

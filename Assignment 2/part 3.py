@@ -48,7 +48,8 @@ def rigid_transform(theta=0, omega=0, phi=0, dx=0, dy=0, dz=0):
                   [0, 0, 0, 1]]).T
 
     final_A = np.dot(A, np.dot(R, T))
-
+    print("ssss")
+    print(final_A.T.shape)
     fig = plt.figure()
     ax = fig.add_subplot(1, 2, 1, projection='3d')
     ax.scatter(A.T[0, :], A.T[1, :], A.T[2, :], color="black")
