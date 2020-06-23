@@ -397,7 +397,7 @@ if __name__ == "__main__":
     plt.tight_layout()
     plt.show()'''
 
-    # Part 4-B
+    # Part 4-C
     img = imread("I1.png")
     plt.subplot(1, 2, 1)
     plt.imshow(img)
