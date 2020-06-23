@@ -1,3 +1,4 @@
+from numpy.linalg import inv
 import os
 import nibabel as nib
 import matplotlib.pyplot as plt
@@ -138,25 +139,27 @@ def rigid_transform(theta=0, omega=0, phi=0, dx=0, dy=0, dz=0):
     ax = fig.add_subplot(1, 2, 1, projection='3d')
     ax.scatter(A.T[0, :], A.T[1, :], A.T[2, :], color="black")
     plt.setp(ax, xticks=[i for i in range(0, 25, 5)],
-             yticks=[i for i in range(0, 25, 5)], zticks=[i for i in range(0, 22, 2)])
+             yticks=[i for i in range(0, 25, 5)], zticks=[i for i in range(0, 22, 5)])
+    ax.set_title("Original 3D grid")
 
     ax = fig.add_subplot(1, 2, 2, projection='3d')
     ax.scatter(final_A.T[0, :], final_A.T[1, :], final_A.T[2, :], color="Red")
-    plt.setp(ax, xticks=[i for i in range(0, 25, 5)],
-             yticks=[i for i in range(0, 25, 5)], zticks=[i for i in range(0, 22, 2)])
-    plt.suptitle("Rigid Transform")
+    # plt.setp(ax, xticks=[i for i in range(0, 25, 5)],
+    #         yticks=[i for i in range(0, 25, 5)], zticks=[i for i in range(0, 22, 2)])
+    ax.set_title("Transformed 3D grid")
+    plt.suptitle("Part 3-A,B Rigid Transform")
     plt.show()
 
 
 # Part 3-C
 def affine_transform(slice=0, theta=0, omega=0, phi=0, dx=0, dy=0, dz=0):
-    print("slice={}".format(slice))
+    '''print("slice={}".format(slice))
     print("theta={}".format(theta))
     print("omega={}".format(omega))
     print("phi={}".format(phi))
     print("dx={}".format(dx))
     print("dy={}".format(dy))
-    print("dz={}".format(dz))
+    print("dz={}".format(dz))'''
     size = 20
     a = np.linspace(0, size, size)
     b = np.linspace(0, size, size)
@@ -206,14 +209,32 @@ def affine_transform(slice=0, theta=0, omega=0, phi=0, dx=0, dy=0, dz=0):
     ax = fig.add_subplot(1, 2, 1, projection='3d')
     ax.scatter(A.T[0, :], A.T[1, :], A.T[2, :], color="black")
     plt.setp(ax, xticks=[i for i in range(0, 25, 5)],
-             yticks=[i for i in range(0, 25, 5)], zticks=[i for i in range(0, 22, 2)])
-
+             yticks=[i for i in range(0, 25, 5)], zticks=[i for i in range(0, 22, 5)])
+    ax.set_title("Original 3D grid")
     ax = fig.add_subplot(1, 2, 2, projection='3d')
     ax.scatter(final_A.T[0, :], final_A.T[1, :], final_A.T[2, :], color="Red")
-    plt.setp(ax, xticks=[i for i in range(0, 25, 5)],
-             yticks=[i for i in range(0, 25, 5)], zticks=[i for i in range(0, 22, 2)])
-    plt.suptitle("Affine Transform")
-    plt.show()
+
+    # plt.setp(ax, xticks=[i for i in range(0, 25, 5)],
+    #         yticks=[i for i in range(0, 25, 5)], zticks=[i for i in range(0, 22, 2)])
+    ax.set_title("Transformed 3D grid")
+    plt.suptitle("Part 3-A,C Affine Transform")
+    # plt.show()
+    M1 = np.array([[0.9045, -0.3847, -0.1840, 10.0000],
+                   [0.2939, 0.8750, -0.3847, 10.0000],
+                   [0.3090, 0.2939, 0.9045, 10.0000],
+                   [0, 0, 0, 1.0000]])
+
+    M2 = np.array([[-0.0000, -0.2598, 0.1500, -3.0000],
+                   [0.0000, -0.1500, -0.2598, 1.5000],
+                   [0.3000, -0.0000, 0.0000, 0],
+                   [0, 0, 0, 1.0000]])
+
+    M3 = np.array([[0.7182, -1.3727, -0.5660, 1.8115],
+                   [-1.9236, -4.6556, -2.5512, 0.2873],
+                   [-0.6426, -1.7985, -1.6285, 0.7404],
+                   [0, 0, 0, 1.0000]])
+
+    print(np.dot(inv(M1).T, T.T).T)
 
 
 # Part 4-A
@@ -275,12 +296,12 @@ def rotation(I, theta=45):
                    bounds_error=False, fill_value=0)
 
     '''plt.subplot(1, 2, 1)
-    plt.imshow(img)
-    plt.title("Original")
-    plt.subplot(1, 2, 2)
-    plt.imshow(znew)
-    plt.title("Transformed")
-    plt.show()'''
+        plt.imshow(img)
+        plt.title("Original")
+        plt.subplot(1, 2, 2)
+        plt.imshow(znew)
+        plt.title("Transformed")
+        plt.show()'''
 
     # ssd_ = ssd(img, znew)
     # print(ssd_)
@@ -301,19 +322,22 @@ if __name__ == "__main__":
     plt.subplot(2, 2, 1)
     plt.imshow(img1)
     plt.title("img 1")
+    plt.colorbar()
 
     plt.subplot(2, 2, 2)
     plt.imshow(img2)
     plt.title("img 2")
+    plt.colorbar()
 
-    myjh, _ = np.log(joint_histogram(img1, img2))
+    myjh, _ = joint_histogram(img1, img2)
     plt.subplot(2, 2, 3)
-    plt.imshow(myjh)
+    plt.imshow(np.log(myjh))
     plt.title("Joint Histogram")
+    plt.suptitle("Part-1\n nxp={}".format(np.sum(myjh)))
     plt.tight_layout()
-    plt.show()
+    plt.show()'''
 
-    for i in range(2, 7):
+    '''for i in range(2, 7):
         img1 = imread('I{}.jpg'.format(i))
         # img1 = imread("I1.png")
         # I = np.array(img1)
@@ -328,15 +352,18 @@ if __name__ == "__main__":
         plt.subplot(2, 2, 1)
         plt.imshow(img1)
         plt.title("img 1")
+        plt.colorbar()
 
         plt.subplot(2, 2, 2)
         plt.imshow(img2)
         plt.title("img 2")
+        plt.colorbar()
 
-        myjh, _ = np.log(joint_histogram(img1, img2))
+        myjh, _ = joint_histogram(img1, img2)
         plt.subplot(2, 2, 3)
-        plt.imshow(myjh)
+        plt.imshow(np.log(myjh))
         plt.title("Joint Histogram")
+        plt.suptitle("Part-1\n nxp={}".format(np.sum(myjh)))
         plt.tight_layout()
         plt.show()'''
 
@@ -348,7 +375,7 @@ if __name__ == "__main__":
     mi = MI(img1, img2)
     print("SSD={} | CORR={} | MI={}".format(ssd, corr, mi))'''
 
-    # Part 3-A,B
+    # Part 3-A, B
     '''rigid_transform(theta=90, omega=0,
                     phi=0, dx=0, dy=0, dz=0)
 
@@ -366,11 +393,12 @@ if __name__ == "__main__":
     znew = translation("I1.png", p=110, q=110)
     plt.imshow(znew)
     plt.title("Transformed")
-    plt.show()
-    rotation("I1.png", 10)'''
+    plt.suptitle("Part-4 A\nTranslation")
+    plt.tight_layout()
+    plt.show()'''
 
     # Part 4-B
-    '''img = imread("I1.png")
+    img = imread("I1.png")
     plt.subplot(1, 2, 1)
     plt.imshow(img)
     plt.title("Original")
@@ -379,4 +407,6 @@ if __name__ == "__main__":
     plt.subplot(1, 2, 2)
     plt.imshow(znew)
     plt.title("Transformed")
-    plt.show()'''
+    plt.suptitle("Part-4 C\nRotation")
+    plt.tight_layout()
+    plt.show()
