@@ -51,9 +51,9 @@ def SSD(A, B):
     return np.sum(np.square(A - B))
 
 
-# Part 2-B
+# Part 2-B (used from data mining course)
 def pearson_correlation(x, y):
-    # used from data mining course
+
     x = x.ravel()
     y = y.ravel()
     n = len(x)
@@ -158,7 +158,7 @@ def rigid_transform(theta=0, omega=0, phi=0, dx=0, dy=0, dz=0):
     plt.show()
 
 
-# Part 3-C
+# Part 3-A,C
 def affine_transform(slice=0.5, theta=0, omega=0, phi=0, dx=0, dy=0, dz=0):
     '''theta = np.deg2rad(theta)
     omega = np.deg2rad(omega)
@@ -374,7 +374,7 @@ def ssd_rotate(i1, i2):
     return ssds
 
 
-# Part 4-E
+# Part 4-E is not implemented
 
 def part_1():
     # Part 1(A,B,C)
