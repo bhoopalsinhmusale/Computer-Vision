@@ -521,13 +521,41 @@ def part_4():
 
     # Part 4-E
 
+def part_5():
+   
+    epi_image = nib.load('/home/divya/Desktop/Computer-Vision/Assignment 2/tof.nii')
+    tof_img = epi_image.get_fdata()
+
+    epi_image = nib.load('/home/divya/Desktop/Computer-Vision/Assignment 2/t1.nii')
+    t1_img = epi_image.get_fdata()
+
+    epi_image = nib.load('/home/divya/Desktop/Computer-Vision/Assignment 2/tof_t1.nii')
+    tof_t1_img = epi_image.get_fdata()
+    
+    plt.subplot(1, 3, 1)
+    plt.imshow(np.rot90(tof_img[140,:,:]))
+    plt.title("tof.nii")
+
+    plt.subplot(1, 3, 2)
+    plt.imshow(np.rot90(t1_img[140,:,:]))
+    plt.title("t1.nii")
+
+    plt.subplot(1, 3, 3)
+    plt.imshow(np.rot90(t1_img[140,:,:]),cmap='gray')
+    plt.imshow(np.rot90(tof_t1_img[140,:,:]),cmap='green', alpha=0.5)
+    plt.title("tof_t1.nii")
+    
+    plt.show()
+   
 
 if __name__ == "__main__":
 
-    part_1()
+    #part_1()
 
-    part_2()
+    #part_2()
 
-    part_3()
+    #part_3()
 
-    part_4()
+    #part_4()
+
+    part_5()
