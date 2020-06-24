@@ -46,7 +46,7 @@ def joint_histogram(I, J, num_bins=16):
 
 
 # Part 2-A
-def ssd(A, B):
+def SSD(A, B):
     dif = A.ravel() - B.ravel()
     return np.sum(np.square(A - B))
 
@@ -90,6 +90,9 @@ def MI(I, J):
 
 # Part 3-A,B
 def rigid_transform(theta=0, omega=0, phi=0, dx=0, dy=0, dz=0):
+    '''theta = np.deg2rad(theta)
+    omega = np.deg2rad(omega)
+    phi = np.deg2rad(phi)'''
     print("theta={}".format(theta))
     print("omega={}".format(omega))
     print("phi={}".format(phi))
@@ -99,10 +102,10 @@ def rigid_transform(theta=0, omega=0, phi=0, dx=0, dy=0, dz=0):
     size = 20
     a = np.linspace(0, size, size)
     b = np.linspace(0, size, size)
-    c = np.linspace(0, size, size)
+    c = np.linspace(0, 5, 5)
     x, y, z = np.meshgrid(a, b, c)
 
-    ones = np.ones((size, size, size))
+    ones = np.ones((20, 20, 5))
 
     # print(x.shape)
     # print(ones.shape)
@@ -127,47 +130,53 @@ def rigid_transform(theta=0, omega=0, phi=0, dx=0, dy=0, dz=0):
                    [0, 0, 0, 1]])
 
     # Composed rotation matrix with (RX, RY, RZ)
-    R = np.dot(np.dot(RX.T, RY.T), RZ.T)
+    R = np.dot(np.dot(RX, RY), RZ)
     # Translation matrix
     T = np.array([[1, 0, 0, dx],
                   [0, 1, 0, dy],
                   [0, 0, 1, dz],
-                  [0, 0, 0, 1]]).T
+                  [0, 0, 0, 1]])
 
     final_A = np.dot(A, np.dot(R, T))
 
     fig = plt.figure()
-    ax = fig.add_subplot(1, 2, 1, projection='3d')
-    ax.scatter(A.T[0, :], A.T[1, :], A.T[2, :], color="black")
-    plt.setp(ax, xticks=[i for i in range(0, 25, 5)],
-             yticks=[i for i in range(0, 25, 5)], zticks=[i for i in range(0, 22, 5)])
-    ax.set_title("Original 3D grid")
+    ax = fig.add_subplot(1, 1, 1, projection='3d')
+    ax.scatter(final_A.T[0, :], final_A.T[1, :],
+               final_A.T[2, :], color="Red", alpha=0.4)
+    ax.scatter(A.T[0, :], A.T[1, :], A.T[2, :], color="black", alpha=0.6)
 
-    ax = fig.add_subplot(1, 2, 2, projection='3d')
-    ax.scatter(final_A.T[0, :], final_A.T[1, :], final_A.T[2, :], color="Red")
+    # ax.set_title("Original 3D grid")
+
+    # ax = fig.add_subplot(1, 2, 2, projection='3d')
+
+    # plt.setp(ax, xticks=[i for i in range(0, 25, 5)],
+    #         yticks=[i for i in range(0, 25, 5)], zticks=[i for i in range(0, 22, 5)])
     # plt.setp(ax, xticks=[i for i in range(0, 25, 5)],
     #         yticks=[i for i in range(0, 25, 5)], zticks=[i for i in range(0, 22, 2)])
-    ax.set_title("Transformed 3D grid")
+    # ax.set_title("Transformed 3D grid")
     plt.suptitle("Part 3-A,B Rigid Transform")
     plt.show()
 
 
 # Part 3-C
-def affine_transform(slice=0, theta=0, omega=0, phi=0, dx=0, dy=0, dz=0):
-    '''print("slice={}".format(slice))
+def affine_transform(slice=0.5, theta=0, omega=0, phi=0, dx=0, dy=0, dz=0):
+    '''theta = np.deg2rad(theta)
+    omega = np.deg2rad(omega)
+    phi = np.deg2rad(phi)'''
+    print("slice={}".format(slice))
     print("theta={}".format(theta))
     print("omega={}".format(omega))
     print("phi={}".format(phi))
     print("dx={}".format(dx))
     print("dy={}".format(dy))
-    print("dz={}".format(dz))'''
+    print("dz={}".format(dz))
     size = 20
     a = np.linspace(0, size, size)
     b = np.linspace(0, size, size)
-    c = np.linspace(0, size, size)
+    c = np.linspace(0, 5, 5)
     x, y, z = np.meshgrid(a, b, c)
 
-    ones = np.ones((size, size, size))
+    ones = np.ones((size, size, 5))
 
     # print(x.shape)
     # print(ones.shape)
@@ -192,34 +201,30 @@ def affine_transform(slice=0, theta=0, omega=0, phi=0, dx=0, dy=0, dz=0):
                    [0, 0, 0, 1]])
 
     # Composed rotation matrix with (RX, RY, RZ)
-    R = np.dot(np.dot(RX.T, RY.T), RZ.T)
+    R = np.dot(np.dot(RX, RY), RZ)
     # Translation matrix
     T = np.array([[1, 0, 0, dx],
                   [0, 1, 0, dy],
                   [0, 0, 1, dz],
-                  [0, 0, 0, 1]]).T
+                  [0, 0, 0, 1]])
     # Scale matrix
     S = np.array([[slice, 0, 0, 0],
                   [0, slice, 0, 0],
                   [0, 0, slice, 0],
-                  [0, 0, 0, 1]]).T
-
-    final_A = np.dot(A, np.dot(S, np.dot(R, T)))
+                  [0, 0, 0, 1]])
+    #print("in afffine")
+    final_A = np.dot(np.dot(A, np.dot(R, T)), S)
 
     fig = plt.figure()
-    ax = fig.add_subplot(1, 2, 1, projection='3d')
-    ax.scatter(A.T[0, :], A.T[1, :], A.T[2, :], color="black")
-    plt.setp(ax, xticks=[i for i in range(0, 25, 5)],
-             yticks=[i for i in range(0, 25, 5)], zticks=[i for i in range(0, 22, 5)])
-    ax.set_title("Original 3D grid")
-    ax = fig.add_subplot(1, 2, 2, projection='3d')
-    ax.scatter(final_A.T[0, :], final_A.T[1, :], final_A.T[2, :], color="Red")
-
+    ax = fig.add_subplot(1, 1, 1, projection='3d')
+    ax.scatter(final_A.T[0, :], final_A.T[1, :],
+               final_A.T[2, :], color="Red", alpha=0.4)
+    ax.scatter(A.T[0, :], A.T[1, :], A.T[2, :], color="black", alpha=0.6)
     # plt.setp(ax, xticks=[i for i in range(0, 25, 5)],
     #         yticks=[i for i in range(0, 25, 5)], zticks=[i for i in range(0, 22, 2)])
-    ax.set_title("Transformed 3D grid")
+    # ax.set_title("Transformed 3D grid")
     plt.suptitle("Part 3-A,C Affine Transform")
-    # plt.show()
+    plt.show()
     M1 = np.array([[0.9045, -0.3847, -0.1840, 10.0000],
                    [0.2939, 0.8750, -0.3847, 10.0000],
                    [0.3090, 0.2939, 0.9045, 10.0000],
@@ -270,13 +275,13 @@ def translation(I, p=0, q=0):
     plt.imshow(znew)
     plt.title("Transformed")
     plt.show()
-    ssd_ = ssd(img, znew)
+    ssd_ = SSD(img, znew)
     print(ssd_)'''
     return znew
 
 
 # Part 4-B
-def regis_trans(i1, i2):
+def ssd_trans(i1, i2):
     ssds = []
     p = q = 0
     i1 = imread(i1)
@@ -286,7 +291,7 @@ def regis_trans(i1, i2):
     for _ in range(n_iter):
         translated_i2 = translation(i2, p, q)
         sub = translated_i2 - i1
-        ssds.append(ssd(i1, translated_i2))
+        ssds.append(SSD(i1, translated_i2))
 
         # compute gradient
         x_grad, y_grad = np.gradient(translated_i2)
@@ -300,8 +305,8 @@ def regis_trans(i1, i2):
 
 
 # Part 4-C
-def rotation(img, theta=45):
-    #img = imread(I)
+def rotation(img, theta=0):
+    img = imread(img)
     # img = img[100:300, 100:300]
     height, width = img.shape
 
@@ -328,33 +333,33 @@ def rotation(img, theta=45):
         plt.title("Transformed")
         plt.show()'''
 
-    # ssd_ = ssd(img, znew)
+    # ssd_ = SSD(img, znew)
     # print(ssd_)
     # return znew'''
     return znew
 
 
 # Part 4-D
-def ssd_rotat(i1, i2):
+def ssd_rotate(i1, i2):
 
     i1 = imread(i1)
-    i2 = imread(i2)
+
     ssds = []
-    theta = 0
+    theta = 45
     stepsize = 0.000005
-    n_iter = 100
+    n_iter = 50
     for _ in range(n_iter):
         # move i2 and save SSD
         rotated_i2 = rotation(i2, theta)
         sub = rotated_i2 - i1
-        ssds.append(ssd(i1, rotated_i2))
+        ssds.append(SSD(i1, rotated_i2))
 
         # compute gradient
         x_grad, y_grad = np.gradient(rotated_i2)
 
         # print(i2)
         # print(i2.shape)
-        x, y = np.mgrid[0:i2.shape[0], 0:i2.shape[1]]
+        x, y = np.mgrid[0:imread(i2).shape[0], 0:imread(i2).shape[1]]
         angle = np.deg2rad(theta)
         s, c = np.sin(angle), np.cos(angle)
         ssd_theta = 2 * np.sum(np.multiply(sub,
@@ -370,33 +375,6 @@ def ssd_rotat(i1, i2):
 
 
 # Part 4-E
-def rigid_transform(i, p, q, theta):
-    """Return a new image corresponding to image i both translated and rotated"""
-    len_x, len_y = i.shape
-    x, y = np.mgrid[0:len_x, 0:len_y]
-
-    t = np.array([[1, 0, p],
-                  [0, 1, q],
-                  [0, 0, 1]])
-
-    angle = np.deg2rad(theta)
-    s, c = np.sin(angle), np.cos(angle)
-    r = np.array([[c, s, 0],
-                  [-s, c, 0],
-                  [0, 0, 1]])
-
-    T = t @ r
-
-    axes = np.vstack([np.ravel(x), np.ravel(y), np.ones(len_x * len_y)])
-    data_points = axes[:-1].T
-    new_axes = np.apply_along_axis(lambda col: T @ col.T, 0, axes)[:-1]
-    new_x, new_y = new_axes[0].reshape(
-        len_x, len_y), new_axes[1].reshape(len_x, len_y)
-    new_i = interpolate.griddata(data_points, np.ravel(
-        i), (new_x, new_y), method='cubic', fill_value=0)
-
-    return new_i
-
 
 def part_1():
     # Part 1(A,B,C)
@@ -462,7 +440,7 @@ def part_2():
     # Part 2-A,B,C,D
     img1 = imread("I1.png")
     img2 = imread("J1.png")
-    ssd = ssd(img1, img2)
+    ssd = SSD(img1, img2)
     corr = pearson_correlation(img1, img2)
     mi = MI(img1, img2)
     print("SSD={} | CORR={} | MI={}".format(ssd, corr, mi))
@@ -470,41 +448,40 @@ def part_2():
 
 def part_3():
     # Part 3-A, B
-    rigid_transform(theta=90, omega=0,
+    rigid_transform(theta=90, omega=60,
                     phi=0, dx=0, dy=0, dz=0)
 
     # Part 3-C
-    affine_transform(slice=-20, theta=90, omega=0,
+    affine_transform(slice=0.5, theta=90, omega=90,
                      phi=0, dx=0, dy=0, dz=0)
 
 
 def part_4():
+    images = ["BrainMRI_1.jpg", "BrainMRI_2.jpg",
+              "BrainMRI_3.jpg", "BrainMRI_4.jpg"]
+
     # Part 4-A
-    img = imread("I1.png")
+    img = imread(images[0])
     plt.subplot(1, 2, 1)
     plt.imshow(img)
     plt.title("Original")
 
     plt.subplot(1, 2, 2)
-    znew = translation("I1.png", p=110, q=110)
+    znew = translation(images[0], p=50, q=50)
     plt.imshow(znew)
     plt.title("Transformed")
     plt.suptitle("Part-4 A\nTranslation")
     plt.tight_layout()
     plt.show()
 
-    # Part 4 B,C,D
-    images = ["BrainMRI_1.jpg", "BrainMRI_2.jpg",
-              "BrainMRI_3.jpg", "BrainMRI_4.jpg"]
-
     # Part 4-B
     ssd_pts = []
     for i in range(1, len(images)):
 
-        ssd_i = regis_trans(images[0], images[i])
+        ssd_i = ssd_trans(images[0], images[i])
         ssd_pts.append(ssd_i)
 
-    plt.subplot(1, 2, 1)
+    plt.subplot(1, 1, 1)
     for i, ssd_i in enumerate(ssd_pts):
         plt.plot(ssd_i, label="BrainMRI_{}".format(i+2))
 
@@ -514,48 +491,43 @@ def part_4():
     plt.show()
 
     # Part 4-C
-    '''img = imread("I1.png")
+    img = imread(images[0])
     plt.subplot(1, 2, 1)
     plt.imshow(img)
     plt.title("Original")
 
-    znew = rotation("I1.png")
+    znew = rotation(images[0], 45)
     plt.subplot(1, 2, 2)
     plt.imshow(znew)
     plt.title("Transformed")
     plt.suptitle("Part-4 C\nRotation")
     plt.tight_layout()
-    plt.show()'''
+    plt.show()
 
     # Part 4-D
-    '''ssd_pts = []
+    ssd_pts = []
     for i in range(1, len(images)):
-        ssd_i = ssd_rotat(
+        ssd_i = ssd_rotate(
             images[0], images[i])
         ssd_pts.append(ssd_i)
 
-    plt.subplot(1, 2, 1)
+    plt.subplot(1, 1, 1)
     for i, ssd_i in enumerate(ssd_pts):
         plt.plot(ssd_i, label="BrainMRI_{}".format(i+2))
 
     plt.suptitle('Part 4-D\nminimizing SSD (rotations)')
-    plt.legend()'
-    plt.show()'''
+    plt.legend()
+    plt.show()
 
     # Part 4-E
 
 
 if __name__ == "__main__":
 
-    # part_1()
+    part_1()
 
-    # part_2()
+    part_2()
 
-    # part_3()
+    part_3()
 
     part_4()
-
-    """Describe the SSD curve, is it strictly decreasing, and if not, why?
-       discuss the quality of your registration
-       stepsize or local optimum
-    """
