@@ -212,7 +212,7 @@ def affine_transform(slice=0.5, theta=0, omega=0, phi=0, dx=0, dy=0, dz=0):
                   [0, slice, 0, 0],
                   [0, 0, slice, 0],
                   [0, 0, 0, 1]])
-    #print("in afffine")
+    # print("in afffine")
     final_A = np.dot(np.dot(A, np.dot(R, T)), S)
 
     fig = plt.figure()
@@ -400,7 +400,7 @@ def part_1():
     plt.subplot(2, 2, 3)
     plt.imshow(np.log(myjh))
     plt.title("Joint Histogram")
-    plt.suptitle("Part-1\n nxp={}".format(np.sum(myjh)))
+    plt.suptitle("Part 1\n nxp={}".format(np.sum(myjh)))
     plt.tight_layout()
     plt.show()
 
@@ -448,7 +448,7 @@ def part_2():
 
 def part_3():
     # Part 3-A, B
-    rigid_transform(theta=90, omega=60,
+    rigid_transform(theta=-180, omega=60,
                     phi=0, dx=0, dy=0, dz=0)
 
     # Part 3-C
@@ -470,7 +470,7 @@ def part_4():
     znew = translation(images[0], p=50, q=50)
     plt.imshow(znew)
     plt.title("Transformed")
-    plt.suptitle("Part-4 A\nTranslation")
+    plt.suptitle("Part 4-A\nTranslation")
     plt.tight_layout()
     plt.show()
 
@@ -500,7 +500,7 @@ def part_4():
     plt.subplot(1, 2, 2)
     plt.imshow(znew)
     plt.title("Transformed")
-    plt.suptitle("Part-4 C\nRotation")
+    plt.suptitle("Part 4-C\nRotation")
     plt.tight_layout()
     plt.show()
 
@@ -521,41 +521,50 @@ def part_4():
 
     # Part 4-E
 
+
 def part_5():
-   
-    epi_image = nib.load('/home/divya/Desktop/Computer-Vision/Assignment 2/tof.nii')
-    tof_img = epi_image.get_fdata()
+    '''
+        first execute following command
 
-    epi_image = nib.load('/home/divya/Desktop/Computer-Vision/Assignment 2/t1.nii')
-    t1_img = epi_image.get_fdata()
+        $flirt -in tof.nii -ref t1.nii -out tof_in_t1.nii
+    '''
 
-    epi_image = nib.load('/home/divya/Desktop/Computer-Vision/Assignment 2/tof_t1.nii')
-    tof_t1_img = epi_image.get_fdata()
-    
-    plt.subplot(1, 3, 1)
-    plt.imshow(np.rot90(tof_img[140,:,:]))
+    epi_image = nib.load('tof.nii')
+    tof_img = epi_image.get_data()
+
+    slice = 150
+    epi_image = nib.load('t1.nii')
+    t1_img = epi_image.get_data()
+
+    epi_image = nib.load('tof_t1.nii')
+    tof_t1_img = epi_image.get_data()
+
+    '''plt.subplot(1, 3, 1)
+    plt.imshow(np.flip(tof_img[slice, :, :]).T)
     plt.title("tof.nii")
 
     plt.subplot(1, 3, 2)
-    plt.imshow(np.rot90(t1_img[140,:,:]))
-    plt.title("t1.nii")
+    plt.imshow(np.flip(t1_img[slice, :, :]).T)
+    plt.title("t1.nii")'''
 
-    plt.subplot(1, 3, 3)
-    plt.imshow(np.rot90(t1_img[140,:,:]),cmap='gray')
-    plt.imshow(np.rot90(tof_t1_img[140,:,:]),cmap='green', alpha=0.5)
+    plt.subplot(1, 1, 1)
+    plt.imshow(np.flip(t1_img[slice, :, :]).T, cmap='gray')
+    plt.imshow(np.flip(tof_t1_img[slice, :, :]).T,
+               cmap='gist_earth', alpha=0.5)
     plt.title("tof_t1.nii")
-    
+    plt.suptitle("Part 5")
+
     plt.show()
-   
+
 
 if __name__ == "__main__":
 
-    #part_1()
+    part_1()
 
-    #part_2()
+    part_2()
 
-    #part_3()
+    part_3()
 
-    #part_4()
+    part_4()
 
     part_5()
