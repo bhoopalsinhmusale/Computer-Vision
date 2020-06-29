@@ -5,13 +5,14 @@ import pandas as pd
 import scipy.stats as stats
 import scipy.signal as signal
 from scipy.ndimage import rotate
+import os
 
 
 def part_2a():
     plt.rcParams.update({'font.size': 20})
-    fmri = nib.load('/home/divya/Desktop/images/clean_bold.nii.gz')
+    fmri = nib.load('clean_bold.nii.gz')
     events = pd.read_csv(
-        '/home/divya/Desktop/images/events.tsv', delimiter='\t')
+        'events.tsv', delimiter='\t')
     events = events.to_numpy()
     tr = fmri.header.get_zooms()[3]
     ts = np.zeros(int(tr*fmri.shape[3]))
@@ -20,8 +21,8 @@ def part_2a():
             ts[int(events[i, 0])] = 1
     plt.plot(ts)
     plt.xlabel('time(seconds)')
-
-    conved = signal.convolve(ts, hrf, mode='full')
+    plt.show()
+    '''conved = signal.convolve(ts, hrf, mode='full')
     conved = conved[0:ts.shape[0]]
     plt.plot(ts)
     plt.plot(conved*3.2, lineWidth=3)
@@ -33,7 +34,7 @@ def part_2a():
     corrs = np.sum(meansub_img*meansub_conved, 3)/(np.sqrt(np.sum(meansub_img *
                                                                   meansub_img, 3))*np.sqrt(np.sum(meansub_conved*meansub_conved)))
     plt.imshow(np.rot90(np.max(corrs, axis=2)))
-    plt.colorbar()
+    plt.colorbar()'''
 
 
 if __name__ == "__main__":
