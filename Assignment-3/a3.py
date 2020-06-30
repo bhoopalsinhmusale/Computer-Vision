@@ -96,6 +96,7 @@ def part_2b():
         fig.add_subplot(8, 6, i)
         plt.imshow(np.rot90(corrs[:, :, i+7]), vmin=-0.25, vmax=0.25)
         plt.title("Slice={}".format(i+7))
+
         plt.subplots_adjust(hspace=1)
     plt.show()
 
