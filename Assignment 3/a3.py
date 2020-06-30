@@ -101,34 +101,39 @@ def part_2b():
 
 
 def dataset_download():
-    for i in range(1, 2):
+    for i in range(1, 3):
         i = str(i).zfill(2)
-        if os.path.exists('part2-data/subject{}'.format(i)):
-            shutil.rmtree('part2-data/subject{}'.format(i))
-        os.makedirs('part2-data/subject{}'.format(i))
+        if os.path.exists('/home/divya/Desktop/Computer-Vision/Assignment-3/part2-data/subject{}'.format(i)):
+            shutil.rmtree(
+                '/home/divya/Desktop/Computer-Vision/Assignment-3/part2-data/subject{}'.format(i))
+        os.makedirs(
+            '/home/divya/Desktop/Computer-Vision/Assignment-3/part2-data/subject{}'.format(i))
+        os.chdir(
+            "/home/divya/Desktop/Computer-Vision/Assignment-3/part2-data/subject{}".format(i))
+        print("\n"+str(os.system("pwd")))
 
-        copyfile("part1-data/pipeline.sh",
-                 "part2-data/subject{}/pipeline.sh".format(i))
-        if not os.path.exists('part2-data/subject{}/t1.nii.gz'.format(i)):
+        copyfile("/home/divya/Desktop/Computer-Vision/Assignment-3/part1-data/pipeline.sh",
+                 "pipeline.sh".format(i))
+        if not os.path.exists('t1.nii.gz'.format(i)):
             T1_url = "https://openneuro.org/crn/datasets/ds000117/snapshots/1.0.3/files/sub-{}:ses-mri:anat:sub-{}_ses-mri_acq-mprage_T1w.nii.gz".format(
                 i, i)
             wget.download(
-                T1_url, 'part2-data/subject{}/t1.nii.gz'.format(i))
+                T1_url, 't1.nii.gz'.format(i))
 
-        if not os.path.exists('part2-data/subject{}/bold.nii.gz'.format(i)):
+        if not os.path.exists('bold.nii.gz'.format(i)):
             bold_url = "https://openneuro.org/crn/datasets/ds000117/snapshots/1.0.3/files/sub-{}:ses-mri:func:sub-{}_ses-mri_task-facerecognition_run-01_bold.nii.gz".format(
                 i, i)
             wget.download(
-                bold_url, 'part2-data/subject{}/bold.nii.gz'.format(i))
+                bold_url, 'bold.nii.gz'.format(i))
 
-        if not os.path.exists('part2-data/subject{}/events.tsv'.format(i)):
+        if not os.path.exists('events.tsv'.format(i)):
             even_url = "https://openneuro.org/crn/datasets/ds000117/snapshots/1.0.3/files/sub-{}:ses-mri:func:sub-{}_ses-mri_task-facerecognition_run-01_events.tsv".format(
                 i, i)
             wget.download(
-                even_url, 'part2-data/subject{}/events.tsv'.format(i))
+                even_url, 'events.tsv'.format(i))
 
-        #os.system("sudo chmod 755 'part2-data/subject{}/pipeline.sh'".format(i))
-        subprocess.call(["./part2-data/subject{}/pipeline.sh".format(i)])
+        os.system("sudo chmod -R 777 './'".format(i))
+        os.system("./pipeline.sh".format(i))
 
 
 if __name__ == "__main__":
