@@ -378,11 +378,11 @@ def ssd_rotate(i1, i2):
 
 def part_1():
     # Part 1(A,B,C)
-    img1 = imread("I1.png")
+    img1 = imread("/home/divya/Desktop/Computer-Vision/Assignment 2/I1.png")
     # I = np.array(img1)
     print(img1.shape)
 
-    img2 = imread("J1.png")
+    img2 = imread("/home/divya/Desktop/Computer-Vision/Assignment 2/J1.png")
     # J = np.array(im_frame)
     print(img2.shape)
 
@@ -438,8 +438,8 @@ def part_1():
 
 def part_2():
     # Part 2-A,B,C,D
-    img1 = imread("I1.png")
-    img2 = imread("J1.png")
+    img1 = imread("/home/divya/Desktop/Computer-Vision/Assignment 2/I1.png")
+    img2 = imread("/home/divya/Desktop/Computer-Vision/Assignment 2/J1.png")
     ssd = SSD(img1, img2)
     corr = pearson_correlation(img1, img2)
     mi = MI(img1, img2)
@@ -561,10 +561,10 @@ if __name__ == "__main__":
 
     part_1()
 
-    part_2()
+    # part_2()
 
-    part_3()
+    # part_3()
 
-    part_4()
+    # part_4()
 
-    part_5()
+    # part_5()
