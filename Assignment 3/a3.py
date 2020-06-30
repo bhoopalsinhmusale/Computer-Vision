@@ -7,7 +7,9 @@ import scipy.signal as signal
 from scipy.ndimage import rotate
 import os
 from shutil import copyfile
+import shutil
 import wget
+import subprocess
 
 plt.rcParams.update({'font.size': 10})
 
@@ -99,21 +101,22 @@ def part_2b():
 
 
 def dataset_download():
-
     for i in range(1, 2):
         i = str(i).zfill(2)
-        if not os.path.exists('part2-data/subject{}'.format(i)):
-            os.makedirs('part2-data/subject{}'.format(i))
+        if os.path.exists('part2-data/subject{}'.format(i)):
+            shutil.rmtree('part2-data/subject{}'.format(i))
+        os.makedirs('part2-data/subject{}'.format(i))
 
         copyfile("part1-data/pipeline.sh",
                  "part2-data/subject{}/pipeline.sh".format(i))
         if not os.path.exists('part2-data/subject{}/t1.nii.gz'.format(i)):
             T1_url = "https://openneuro.org/crn/datasets/ds000117/snapshots/1.0.3/files/sub-{}:ses-mri:anat:sub-{}_ses-mri_acq-mprage_T1w.nii.gz".format(
                 i, i)
-            wget.download(T1_url, 'part2-data/subject{}/t1.nii.gz'.format(i))
+            wget.download(
+                T1_url, 'part2-data/subject{}/t1.nii.gz'.format(i))
 
         if not os.path.exists('part2-data/subject{}/bold.nii.gz'.format(i)):
-            bold_url = "https://openneuro.org/crn/datasets/ds000117/snapshots/1.0.3/files/sub{}:ses-mri:func:sub-{}_ses-mri_task-facerecognition_run-01_bold.nii.gz".format(
+            bold_url = "https://openneuro.org/crn/datasets/ds000117/snapshots/1.0.3/files/sub-{}:ses-mri:func:sub-{}_ses-mri_task-facerecognition_run-01_bold.nii.gz".format(
                 i, i)
             wget.download(
                 bold_url, 'part2-data/subject{}/bold.nii.gz'.format(i))
@@ -125,7 +128,7 @@ def dataset_download():
                 even_url, 'part2-data/subject{}/events.tsv'.format(i))
 
         #os.system("sudo chmod 755 'part2-data/subject{}/pipeline.sh'".format(i))
-        os.system("./part2-data/subject{}/pipeline.sh".format(i))
+        subprocess.call(["./part2-data/subject{}/pipeline.sh".format(i)])
 
 
 if __name__ == "__main__":
