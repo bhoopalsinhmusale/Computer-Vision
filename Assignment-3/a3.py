@@ -179,6 +179,7 @@ def part_3():
 def plot_corrs_in_t1():
     for i in range(1, 2):
         i = str(i).zfill(2)
+
         os.chdir(
             "/home/divya/Desktop/Computer-Vision/Assignment-3/part2-data/subject{}".format(i))
         print("\n"+str(os.system("pwd")))
