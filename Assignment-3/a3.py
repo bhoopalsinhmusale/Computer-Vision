@@ -143,6 +143,10 @@ def dataset_download():
 
 
 def part_3():
+    hrf = pd.read_csv(
+        "/home/divya/Desktop/Computer-Vision/Assignment-3/part1-data/hrf.csv", header=None)
+    hrf = hrf.to_numpy().reshape(len(hrf),)
+
     for i in range(1, 2):
         i = str(i).zfill(2)
         os.chdir(
@@ -156,9 +160,6 @@ def part_3():
         for i in np.arange(0, events.shape[0]):
             if events[i, 3] == 'FAMOUS' or events[i, 3] == 'UNFAMILIAR' or events[i, 3] == 'SCRAMBLED':
                 ts[int(events[i, 0])] = 1
-        hrf = pd.read_csv(
-            "/home/divya/Desktop/Computer-Vision/Assignment-3/part1-data/hrf.csv", header=None)
-        hrf = hrf.to_numpy().reshape(len(hrf),)
         conved = signal.convolve(ts, hrf, mode='full')
         conved = conved[0:ts.shape[0]]
         conved = conved[0::2]
@@ -174,6 +175,19 @@ def part_3():
 
         os.system(
             "flirt -in corrs.nii.gz -ref t1.nii.gz -applyxfm -init epireg.mat -out corrs_in_t1.nii.gz")
+
+        afni t1.nii.gz corrs_in_t1.nii.gz\
+            - com 'SWITCH_UNDERLAY t1.nii.gz' \
+            - com 'SWITCH_OVERLAY corrs_in_t1.nii.gz' \
+            # flirt -in t1.nii.gz -ref corrs.nii.gz  -applyxfm -init epireg.mat -out corrs_in_t1.nii.gz
+
+        '''epi_image = nib.load('corrs_in_t1.nii.gz')
+        tof_t1_img = epi_image.get_data()
+
+        plt.subplot(1, 1, 1)
+        plt.imshow(np.flip(tof_t1_img[100, :, :]).T)
+        plt.title("tof.nii")
+        plt.show()'''
 
 
 def plot_corrs_in_t1():

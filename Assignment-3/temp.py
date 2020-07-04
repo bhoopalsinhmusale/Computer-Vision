@@ -19,9 +19,14 @@ def corr_volume(im, cv):
 def run():
     """Localize task activation: find out which brain area responds to a task"""
     # load data files
-    fmri = nib.load('clean_bold.nii.gz')  # f-mri image after pre-processing
-    task = pd.read_csv('events.tsv', delimiter='\t').to_numpy()
-    hrf = pd.read_csv('hrf.csv', header=None)  # hemodynamic response function
+    # f-mri image after pre-processing
+    fmri = nib.load(
+        '/home/divya/Desktop/Computer-Vision/Assignment-3/part2-data/subject01/clean_bold.nii.gz')
+    task = pd.read_csv(
+        '/home/divya/Desktop/Computer-Vision/Assignment-3/part2-data/subject01/events.tsv', delimiter='\t').to_numpy()
+    # hemodynamic response function
+    hrf = pd.read_csv(
+        '/home/divya/Desktop/Computer-Vision/Assignment-3/part1-data/hrf.csv', header=None)
     hrf = hrf.to_numpy().reshape(len(hrf),)
 
     # repetition time (time interval between 2 volumes)
