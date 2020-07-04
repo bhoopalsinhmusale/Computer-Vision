@@ -138,8 +138,8 @@ def dataset_download():
             wget.download(
                 even_url, 'events.tsv'.format(i))
 
-        #os.system("sudo chmod -R 777 './'".format(i))
-        # os.system("./pipeline.sh".format(i))
+        os.system("sudo chmod -R 777 './'".format(i))
+        os.system("./pipeline.sh".format(i))
 
 
 def part_3():
@@ -176,11 +176,21 @@ def part_3():
         os.system(
             "flirt -in corrs.nii.gz -ref t1.nii.gz -applyxfm -init epireg.mat -out corrs_in_t1.nii.gz")
 
-        afni t1.nii.gz corrs_in_t1.nii.gz\
-            - com 'SWITCH_UNDERLAY t1.nii.gz' \
-            - com 'SWITCH_OVERLAY corrs_in_t1.nii.gz' \
-            # flirt -in t1.nii.gz -ref corrs.nii.gz  -applyxfm -init epireg.mat -out corrs_in_t1.nii.gz
-
+        os.system("afni -com 'OPEN_WINDOW A.axialimage'                                            \
+            -com 'OPEN_WINDOW A.sagittalimage'                                         \
+            -com 'OPEN_WINDOW A.coronalimage'                                          \
+            -com 'SET_DICOM_XYZ A 17.900 62.688 1.632'                                                    \
+            -com 'SET_PBAR_ALL A.-5844 1.0 Spectrum:red_to_blue' \
+            -com 'SWITCH_UNDERLAY t1.nii.gz+orig'                                      \
+            -com 'SEE_OVERLAY A.-'                                                     \
+            -com 'SWITCH_OVERLAY corrs_in_t1.nii.gz+orig'                                         \
+            -com 'SEE_OVERLAY A.+'                    \
+            -com 'SET_THRESHOLD A.01506 1' \
+            -com 'SAVE_JPEG A.axialimage axialimage.jpg blowup=2'   \
+            -com 'SAVE_JPEG A.sagittalimage sagittalimage.jpg blowup=2'\
+            -com 'SAVE_JPEG A.coronalimage coronalimage.jpg blowup=2'        \
+            -com 'QUIT'")
+        print("Subject{} is completed".format(i))
         '''epi_image = nib.load('corrs_in_t1.nii.gz')
         tof_t1_img = epi_image.get_data()
 
