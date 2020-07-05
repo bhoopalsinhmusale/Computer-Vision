@@ -10,8 +10,11 @@ from shutil import copyfile
 import shutil
 import wget
 import subprocess
+import matplotlib.image as mpimg
 
 plt.rcParams.update({'font.size': 10})
+
+no = 3
 
 
 def part_2a(filePath="/home/divya/Desktop/Computer-Vision/Assignment-3/part1-data"):
@@ -106,7 +109,7 @@ def part_2b(filePath="/home/divya/Desktop/Computer-Vision/Assignment-3/part1-dat
 
 
 def dataset_download():
-    for i in range(1, 2):
+    for i in range(1, no):
         i = str(i).zfill(2)
         '''if os.path.exists('/home/divya/Desktop/Computer-Vision/Assignment-3/part2-data/subject{}'.format(i)):
             shutil.rmtree(
@@ -138,8 +141,10 @@ def dataset_download():
             wget.download(
                 even_url, 'events.tsv'.format(i))
 
-        os.system("sudo chmod -R 777 './'".format(i))
-        os.system("./pipeline.sh".format(i))
+        #os.system("sudo chmod -R 777 './'".format(i))
+        if not os.path.exists("clean_bold.nii.gz"):
+            os.system("./pipeline.sh".format(i))
+        return 0
 
 
 def part_3():
@@ -147,7 +152,7 @@ def part_3():
         "/home/divya/Desktop/Computer-Vision/Assignment-3/part1-data/hrf.csv", header=None)
     hrf = hrf.to_numpy().reshape(len(hrf),)
 
-    for i in range(1, 2):
+    for i in range(1, no):
         i = str(i).zfill(2)
         os.chdir(
             "/home/divya/Desktop/Computer-Vision/Assignment-3/part2-data/subject{}".format(i))
@@ -176,19 +181,19 @@ def part_3():
         os.system(
             "flirt -in corrs.nii.gz -ref t1.nii.gz -applyxfm -init epireg.mat -out corrs_in_t1.nii.gz")
 
-        os.system("afni -com 'OPEN_WINDOW A.axialimage'                                            \
-            -com 'OPEN_WINDOW A.sagittalimage'                                         \
-            -com 'OPEN_WINDOW A.coronalimage'                                          \
-            -com 'SET_DICOM_XYZ A 17.900 62.688 1.632'                                                    \
-            -com 'SET_PBAR_ALL A.-5844 1.0 Spectrum:red_to_blue' \
-            -com 'SWITCH_UNDERLAY t1.nii.gz+orig'                                      \
-            -com 'SEE_OVERLAY A.-'                                                     \
-            -com 'SWITCH_OVERLAY corrs_in_t1.nii.gz+orig'                                         \
-            -com 'SEE_OVERLAY A.+'                    \
-            -com 'SET_THRESHOLD A.01506 1' \
-            -com 'SAVE_JPEG A.axialimage axialimage.jpg blowup=2'   \
-            -com 'SAVE_JPEG A.sagittalimage sagittalimage.jpg blowup=2'\
-            -com 'SAVE_JPEG A.coronalimage coronalimage.jpg blowup=2'        \
+        os.system("afni -com 'OPEN_WINDOW A.axialimage'\
+            -com 'OPEN_WINDOW A.sagittalimage'\
+            -com 'OPEN_WINDOW A.coronalimage'\
+            -com 'SET_DICOM_XYZ A 17.900 62.688 1.632'\
+            -com 'SET_PBAR_ALL A.-5844 1.0 Spectrum:red_to_blue'\
+            -com 'SWITCH_UNDERLAY t1.nii.gz+orig'\
+            -com 'SEE_OVERLAY A.-'\
+            -com 'SWITCH_OVERLAY corrs_in_t1.nii.gz+orig'\
+            -com 'SEE_OVERLAY A.+'\
+            -com 'SET_THRESHOLD A.01506 1'\
+            -com 'SAVE_PNG A.axialimage axialimage.png blowup=5'\
+            -com 'SAVE_PNG A.sagittalimage sagittalimage.png blowup=5'\
+            -com 'SAVE_PNG A.coronalimage coronalimage.png blowup=5'\
             -com 'QUIT'")
         print("Subject{} is completed".format(i))
         '''epi_image = nib.load('corrs_in_t1.nii.gz')
@@ -198,15 +203,39 @@ def part_3():
         plt.imshow(np.flip(tof_t1_img[100, :, :]).T)
         plt.title("tof.nii")
         plt.show()'''
+        return 0
 
 
 def plot_corrs_in_t1():
-    for i in range(1, 2):
+    fig, axes = plt.subplots(16, 3)
+    for i in range(1, no):
+        r = i
+        print("R=%", r)
         i = str(i).zfill(2)
 
         os.chdir(
             "/home/divya/Desktop/Computer-Vision/Assignment-3/part2-data/subject{}".format(i))
         print("\n"+str(os.system("pwd")))
+
+        plt.subplot(16, 3, r+1)
+        img = mpimg.imread("axialimage.png")
+        plt.imshow(np.fliplr(img))
+        plt.title("Subject{}-axialimage.png".format(i))
+
+        plt.subplot(16, 3, r+1)
+        img = mpimg.imread("sagittalimage.png")
+        plt.imshow(img)
+        plt.title("Subject{}-sagittalimage.png".format(i))
+
+        plt.subplot(16, 3, r+1)
+        img = mpimg.imread("coronalimage.png")
+        plt.imshow(np.fliplr(img))
+        plt.title("Subject{}-coronalimage.png".format(i))
+
+    plt.tight_layout()
+    plt.suptitle("Final Output")
+    plt.show()
+    return 0
 
 
 if __name__ == "__main__":
@@ -216,5 +245,10 @@ if __name__ == "__main__":
     # part_2b()
 
     # dataset_download()
+    '''completed = 1
+    if dataset_download() == 0:
+        completed = part_3()
+    if completed == 0:
+        plot_corrs_in_t1()'''
 
-    part_3()
+    plot_corrs_in_t1()
