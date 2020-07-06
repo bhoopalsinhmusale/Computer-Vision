@@ -15,8 +15,6 @@ import matplotlib.image as mpimg
 
 plt.rcParams.update({'font.size': 10})
 
-no = 4
-
 
 def part_2a():
 
@@ -185,7 +183,18 @@ def dataset_download_preprocess():
     return 0
 
 
-def correlation_map_registration_overlay():
+def correlation_map_registration_overlay():  # fully Automated
+    '''
+    Funtion to automatically perform all AFNI GUI tasks for each subject
+    1. Compute correlation map
+    2. Save corr.nii.gz
+    3. Brings the correlation map into the subject’s T1 space
+    4. Automated GUI AFNI open and overlay and underlay image selection
+    5. Automated AFNI DICOM XYZ position selection
+    6. Automated AFNI threshold selection
+    7. Automated AFNI saves all images axial,sagittal and coronal
+    8. Automated AFNI close at the end
+    '''
     print("\n"+str(os.system("pwd")))
     hrf = pd.read_csv(
         "part1-data/hrf.csv", header=None)
@@ -193,9 +202,6 @@ def correlation_map_registration_overlay():
 
     for i in range(1, no):
         i = str(i).zfill(2)
-        # os.chdir(
-        #    "/home/divya/Desktop/Computer-Vision/Assignment-3/part2-data/subject{}".format(i))
-        # print("\n"+str(os.system("pwd")))
         fmri = nib.load("part2-data/subject{}/clean_bold.nii.gz".format(i))
         events = pd.read_csv(
             "part2-data/subject{}/events.tsv".format(i), delimiter='\t')
