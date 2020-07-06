@@ -136,7 +136,7 @@ def part_2b():
     return corrs
 
 
-no = 7  # subject count
+no = 16  # subject count
 
 
 def dataset_download_preprocess():
@@ -322,8 +322,6 @@ def part_3():
     print("plot_corrs_in_t1 is running.")
     thread.join()
     print("plot_corrs_in_t1 thread has finished.")
-
-    # plot_corrs_in_t1()
 
 
 if __name__ == "__main__":
