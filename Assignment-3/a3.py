@@ -18,8 +18,8 @@ plt.rcParams.update({'font.size': 10})
 
 def part_2a():
 
-    fmri = nib.load("part1-data/clean_bold.nii.gz")
-    events = pd.read_csv("part1-data/events.tsv", delimiter='\t')
+    fmri = nib.load("part-2-data/clean_bold.nii.gz")
+    events = pd.read_csv("part-2-data/events.tsv", delimiter='\t')
     events = events.to_numpy()
     tr = fmri.header.get_zooms()[3]
     ts = np.zeros(int(tr*fmri.shape[3]))
@@ -31,7 +31,7 @@ def part_2a():
     plt.xlabel('time(seconds)')
     plt.show()
 
-    hrf = pd.read_csv("part1-data/hrf.csv", header=None)
+    hrf = pd.read_csv("part-2-data/hrf.csv", header=None)
     hrf = hrf.to_numpy().reshape(len(hrf),)
 
     conved = signal.convolve(ts, hrf, mode='full')
@@ -77,8 +77,8 @@ def part_2a():
 
 
 def part_2b():
-    fmri = nib.load('part1-data/bold.nii.gz')
-    events = pd.read_csv('part1-data/events.tsv', delimiter='\t')
+    fmri = nib.load('part-2-data/bold.nii.gz')
+    events = pd.read_csv('part-2-data/events.tsv', delimiter='\t')
     events = events.to_numpy()
     tr = fmri.header.get_zooms()[3]
     ts = np.zeros(int(tr*fmri.shape[3]))
@@ -90,7 +90,7 @@ def part_2b():
     plt.xlabel('time(seconds)')
     plt.show()
 
-    hrf = pd.read_csv('part1-data/hrf.csv', header=None)
+    hrf = pd.read_csv('part-2-data/hrf.csv', header=None)
     hrf = hrf.to_numpy().reshape(len(hrf),)
 
     conved = signal.convolve(ts, hrf, mode='full')
@@ -162,7 +162,7 @@ def dataset_download_preprocess():
         #    "/home/divya/Desktop/Computer-Vision/Assignment-3/part-3-data/subject{}".format(i))
         # print("\n"+str(os.system("pwd")))
 
-        copyfile("part1-data/pipeline.sh",
+        copyfile("part-2-data/pipeline.sh",
                  "part-3-data/subject{}/pipeline.sh".format(i))
         if not os.path.exists('part-3-data/subject{}/t1.nii.gz'.format(i)):
             T1_url = "https://openneuro.org/crn/datasets/ds000117/snapshots/1.0.3/files/sub-{}:ses-mri:anat:sub-{}_ses-mri_acq-mprage_T1w.nii.gz".format(
@@ -207,7 +207,7 @@ def correlation_map_registration_overlay():  # fully Automated
     '''
     print("\n"+str(os.system("pwd")))
     hrf = pd.read_csv(
-        "part1-data/hrf.csv", header=None)
+        "part-2-data/hrf.csv", header=None)
     hrf = hrf.to_numpy().reshape(len(hrf),)
 
     for i in range(1, no):
