@@ -9,19 +9,19 @@ import os
 from shutil import copyfile
 import shutil
 import wget
-import subprocess
+import threading
+
 import matplotlib.image as mpimg
 
 plt.rcParams.update({'font.size': 10})
 
-no = 3
+no = 4
 
 
-def part_2a(filePath="/home/divya/Desktop/Computer-Vision/Assignment-3/part1-data"):
-    os.chdir(filePath)
-    print("\n"+str(os.system("pwd")))
-    fmri = nib.load("clean_bold.nii.gz")
-    events = pd.read_csv("events.tsv", delimiter='\t')
+def part_2a():
+
+    fmri = nib.load("part1-data/clean_bold.nii.gz")
+    events = pd.read_csv("part1-data/events.tsv", delimiter='\t')
     events = events.to_numpy()
     tr = fmri.header.get_zooms()[3]
     ts = np.zeros(int(tr*fmri.shape[3]))
@@ -29,20 +29,19 @@ def part_2a(filePath="/home/divya/Desktop/Computer-Vision/Assignment-3/part1-dat
         if events[i, 3] == 'FAMOUS' or events[i, 3] == 'UNFAMILIAR' or events[i, 3] == 'SCRAMBLED':
             ts[int(events[i, 0])] = 1
 
-    plt.plot(ts)
+    '''plt.plot(ts)
     plt.xlabel('time(seconds)')
-    plt.show()
+    plt.show()'''
 
-    hrf = pd.read_csv(
-        "/home/divya/Desktop/Computer-Vision/Assignment-3/part1-data/hrf.csv", header=None)
+    hrf = pd.read_csv("part1-data/hrf.csv", header=None)
     hrf = hrf.to_numpy().reshape(len(hrf),)
 
     conved = signal.convolve(ts, hrf, mode='full')
     conved = conved[0:ts.shape[0]]
-    plt.plot(ts)
-    plt.plot(conved*3.2, lineWidth=3)
+    '''plt.plot(ts)
+    plt.plot(conved*3.2, linewidth=1)
     plt.xlabel('time(seconds)')
-    plt.show()
+    plt.show()'''
 
     conved = conved[0::2]
     img = fmri.get_fdata()
@@ -51,16 +50,30 @@ def part_2a(filePath="/home/divya/Desktop/Computer-Vision/Assignment-3/part1-dat
     meansub_conved = conved - np.mean(conved)
     corrs = np.sum(meansub_img*meansub_conved, 3)/(np.sqrt(np.sum(meansub_img *
                                                                   meansub_img, 3))*np.sqrt(np.sum(meansub_conved*meansub_conved)))
-
-    fig = plt.figure(figsize=(20, 20))
-    plt.axis('off')
-    for i in range(1, 6*8 + 1):
-        fig.add_subplot(8, 6, i)
-        plt.imshow(np.rot90(corrs[:, :, i+7]), vmin=-0.25, vmax=0.25)
+    # code to display each slice Individual
+    '''for i in range(1, 47):
+        plt.subplot(1, 1, 1)
+        plt.imshow(np.rot90(corrs[:, :, i+7]),
+                   vmin=-0.25, vmax=0.25, aspect=0.7)
         plt.title("Slice={}".format(i+7))
-        plt.subplots_adjust(hspace=1)
+        plt.savefig("part1-output-images/Slice={}".format(i+7))
+        plt.show()'''
+
+    axes = []
+    fig = plt.figure(figsize=(20, 20))
+
+    for a in range(6*8):
+
+        axes.append(fig.add_subplot(6, 8, a+1))
+        plt.imshow(np.rot90(corrs[:, :, a+7]),
+                   vmin=-0.25, vmax=0.25)
+
+    fig.tight_layout(rect=[0, 0.03, 1, 0.95])
+    plt.savefig("part-2-A")
+    plt.suptitle(
+        "part-2-A-localize task activation(clean_bold.nii.gz)\nSlices-7 to 54")
     plt.show()
-    return corrs
+    return 0
 
 
 def part_2b(filePath="/home/divya/Desktop/Computer-Vision/Assignment-3/part1-data"):
@@ -84,7 +97,7 @@ def part_2b(filePath="/home/divya/Desktop/Computer-Vision/Assignment-3/part1-dat
     conved = signal.convolve(ts, hrf, mode='full')
     conved = conved[0:ts.shape[0]]
     plt.plot(ts)
-    plt.plot(conved*3.2, lineWidth=3)
+    plt.plot(conved*3.2, linewidth=1)
     plt.xlabel('time(seconds)')
     plt.show()
 
@@ -104,67 +117,81 @@ def part_2b(filePath="/home/divya/Desktop/Computer-Vision/Assignment-3/part1-dat
         plt.title("Slice={}".format(i+7))
 
         plt.subplots_adjust(hspace=1)
+    plt.suptitle(
+        "Part-2-B-localize task activation (bold.nii.gz)\nAll-Slices")
+    plt.savefig(
+        "part1-output-images/Part-2-B-localize task activation (bold.nii.gz)\nAll-Slices.png")
     plt.show()
     return corrs
 
 
-def dataset_download():
+def dataset_download_preprocess():
+    os.system("sudo chmod -R 777 './part2-data/'")
+    print("\n"+str(os.system("pwd")))
     for i in range(1, no):
         i = str(i).zfill(2)
-        '''if os.path.exists('/home/divya/Desktop/Computer-Vision/Assignment-3/part2-data/subject{}'.format(i)):
+        '''if os.path.exists('part2-data/subject{}'.format(i)):
             shutil.rmtree(
-                '/home/divya/Desktop/Computer-Vision/Assignment-3/part2-data/subject{}'.format(i))'''
-        if not os.path.exists('/home/divya/Desktop/Computer-Vision/Assignment-3/part2-data/subject{}'.format(i)):
-            os.makedirs(
-                '/home/divya/Desktop/Computer-Vision/Assignment-3/part2-data/subject{}'.format(i))
-        os.chdir(
-            "/home/divya/Desktop/Computer-Vision/Assignment-3/part2-data/subject{}".format(i))
-        print("\n"+str(os.system("pwd")))
+                'part2-data/subject{}'.format(i))'''
 
-        copyfile("/home/divya/Desktop/Computer-Vision/Assignment-3/part1-data/pipeline.sh",
-                 "pipeline.sh".format(i))
-        if not os.path.exists('t1.nii.gz'.format(i)):
+        if not os.path.exists('part2-data/subject{}'.format(i)):
+            os.makedirs(
+                'part2-data/subject{}'.format(i))
+        # os.chdir(
+        #    "/home/divya/Desktop/Computer-Vision/Assignment-3/part2-data/subject{}".format(i))
+        # print("\n"+str(os.system("pwd")))
+
+        copyfile("part1-data/pipeline.sh",
+                 "part2-data/subject{}/pipeline.sh".format(i))
+        if not os.path.exists('part2-data/subject{}/t1.nii.gz'.format(i)):
             T1_url = "https://openneuro.org/crn/datasets/ds000117/snapshots/1.0.3/files/sub-{}:ses-mri:anat:sub-{}_ses-mri_acq-mprage_T1w.nii.gz".format(
                 i, i)
             wget.download(
-                T1_url, 't1.nii.gz'.format(i))
+                T1_url, 'part2-data/subject{}/t1.nii.gz'.format(i))
 
-        if not os.path.exists('bold.nii.gz'.format(i)):
+        if not os.path.exists('part2-data/subject{}/bold.nii.gz'.format(i)):
             bold_url = "https://openneuro.org/crn/datasets/ds000117/snapshots/1.0.3/files/sub-{}:ses-mri:func:sub-{}_ses-mri_task-facerecognition_run-01_bold.nii.gz".format(
                 i, i)
             wget.download(
-                bold_url, 'bold.nii.gz'.format(i))
+                bold_url, 'part2-data/subject{}/bold.nii.gz'.format(i))
 
-        if not os.path.exists('events.tsv'.format(i)):
+        if not os.path.exists('part2-data/subject{}/events.tsv'.format(i)):
             even_url = "https://openneuro.org/crn/datasets/ds000117/snapshots/1.0.3/files/sub-{}:ses-mri:func:sub-{}_ses-mri_task-facerecognition_run-01_events.tsv".format(
                 i, i)
             wget.download(
-                even_url, 'events.tsv'.format(i))
+                even_url, 'part2-data/subject{}/events.tsv'.format(i))
 
-        #os.system("sudo chmod -R 777 './'".format(i))
-        if not os.path.exists("clean_bold.nii.gz"):
+        os.chdir("part2-data/subject{}".format(i))
+        print("\n"+str(os.system("pwd")))
+
+        os.system("sudo chmod -R 777 './'".format(i))
+        if not os.path.exists("clean_bold.nii.gz".format(i)):
             os.system("./pipeline.sh".format(i))
-        return 0
+        os.chdir("..")
+        os.chdir("..")
+    return 0
 
 
-def part_3():
+def correlation_map_registration_overlay():
+    print("\n"+str(os.system("pwd")))
     hrf = pd.read_csv(
-        "/home/divya/Desktop/Computer-Vision/Assignment-3/part1-data/hrf.csv", header=None)
+        "part1-data/hrf.csv", header=None)
     hrf = hrf.to_numpy().reshape(len(hrf),)
 
     for i in range(1, no):
         i = str(i).zfill(2)
-        os.chdir(
-            "/home/divya/Desktop/Computer-Vision/Assignment-3/part2-data/subject{}".format(i))
-        print("\n"+str(os.system("pwd")))
-        fmri = nib.load("clean_bold.nii.gz")
-        events = pd.read_csv("events.tsv", delimiter='\t')
+        # os.chdir(
+        #    "/home/divya/Desktop/Computer-Vision/Assignment-3/part2-data/subject{}".format(i))
+        # print("\n"+str(os.system("pwd")))
+        fmri = nib.load("part2-data/subject{}/clean_bold.nii.gz".format(i))
+        events = pd.read_csv(
+            "part2-data/subject{}/events.tsv".format(i), delimiter='\t')
         events = events.to_numpy()
         tr = fmri.header.get_zooms()[3]
         ts = np.zeros(int(tr*fmri.shape[3]))
-        for i in np.arange(0, events.shape[0]):
-            if events[i, 3] == 'FAMOUS' or events[i, 3] == 'UNFAMILIAR' or events[i, 3] == 'SCRAMBLED':
-                ts[int(events[i, 0])] = 1
+        for j in np.arange(0, events.shape[0]):
+            if events[j, 3] == 'FAMOUS' or events[j, 3] == 'UNFAMILIAR' or events[j, 3] == 'SCRAMBLED':
+                ts[int(events[j, 0])] = 1
         conved = signal.convolve(ts, hrf, mode='full')
         conved = conved[0:ts.shape[0]]
         conved = conved[0::2]
@@ -176,8 +203,10 @@ def part_3():
                                                                       meansub_img, 3))*np.sqrt(np.sum(meansub_conved*meansub_conved)))
 
         corrs_nifti = nib.Nifti1Image(corrs, fmri.affine)
-        nib.save(corrs_nifti, 'corrs.nii.gz')
+        nib.save(corrs_nifti, "part2-data/subject{}/corrs.nii.gz".format(i))
 
+        os.chdir("part2-data/subject{}".format(i))
+        print("\n"+str(os.system("pwd")))
         os.system(
             "flirt -in corrs.nii.gz -ref t1.nii.gz -applyxfm -init epireg.mat -out corrs_in_t1.nii.gz")
 
@@ -196,59 +225,75 @@ def part_3():
             -com 'SAVE_PNG A.coronalimage coronalimage.png blowup=5'\
             -com 'QUIT'")
         print("Subject{} is completed".format(i))
-        '''epi_image = nib.load('corrs_in_t1.nii.gz')
-        tof_t1_img = epi_image.get_data()
-
-        plt.subplot(1, 1, 1)
-        plt.imshow(np.flip(tof_t1_img[100, :, :]).T)
-        plt.title("tof.nii")
-        plt.show()'''
-        return 0
+        os.chdir("..")
+        os.chdir("..")
+        print("\n"+str(os.system("pwd")))
+    return 0
 
 
 def plot_corrs_in_t1():
-    fig, axes = plt.subplots(16, 3)
-    for i in range(1, no):
-        r = i
-        print("R=%", r)
-        i = str(i).zfill(2)
-
-        os.chdir(
-            "/home/divya/Desktop/Computer-Vision/Assignment-3/part2-data/subject{}".format(i))
+    fig = plt.figure()
+    print("\n"+str(os.system("pwd")))
+    for r in range(1, no):
         print("\n"+str(os.system("pwd")))
 
-        plt.subplot(16, 3, r+1)
-        img = mpimg.imread("axialimage.png")
-        plt.imshow(np.fliplr(img))
-        plt.title("Subject{}-axialimage.png".format(i))
-
-        plt.subplot(16, 3, r+1)
-        img = mpimg.imread("sagittalimage.png")
+        img = np.fliplr(mpimg.imread(
+            "part2-data/subject{}/axialimage.png".format(str(r).zfill(2))))
+        plt.subplot(1, 3, 1)
         plt.imshow(img)
-        plt.title("Subject{}-sagittalimage.png".format(i))
+        plt.axis('off')
+        plt.title(
+            "Subject{}-axialimage.png".format(str(r).zfill(2)))
+        # axes[r-1, c].set_aspect(aspect=0.6)
 
-        plt.subplot(16, 3, r+1)
-        img = mpimg.imread("coronalimage.png")
-        plt.imshow(np.fliplr(img))
-        plt.title("Subject{}-coronalimage.png".format(i))
+        img = mpimg.imread(
+            "part2-data/subject{}/sagittalimage.png".format(str(r).zfill(2)))
+        plt.subplot(1, 3, 2)
+        plt.imshow(img)
+        plt.axis('off')
+        plt.title("Subject{}-sagittalimage.png".format(str(r).zfill(2)))
+        # axes[r-1, c+1].set_aspect(aspect=0.6)
 
-    plt.tight_layout()
-    plt.suptitle("Final Output")
-    plt.show()
+        img = np.fliplr(mpimg.imread(
+            "part2-data/subject{}/coronalimage.png".format(str(r).zfill(2))))
+        plt.subplot(1, 3, 3)
+        plt.imshow(img)
+        plt.axis('off')
+        plt.title("Subject{}-coronalimage.png".format(str(r).zfill(2)))
+
+        plt.suptitle("Subject{}-Final-Output".format(str(r).zfill(2)))
+        plt.savefig(
+            "part2-data/subject{}/Subject{}-Final-Output".format(str(r).zfill(2), str(r).zfill(2)))
+        plt.show()
     return 0
+
+
+def part_3():
+    thread = threading.Thread(target=dataset_download_preprocess)
+    thread.start()
+    print("dataset_download_preprocess is running.")
+    thread.join()
+    print("dataset_download_preprocess thread has finished.")
+
+    thread = threading.Thread(target=correlation_map_registration_overlay)
+    thread.start()
+    print("correlation_map_registration_overlay is running.")
+    thread.join()
+    print("correlation_map_registration_overlay thread has finished.")
+
+    thread = threading.Thread(target=plot_corrs_in_t1)
+    thread.start()
+    print("plot_corrs_in_t1 is running.")
+    thread.join()
+    print("plot_corrs_in_t1 thread has finished.")
+
+    # plot_corrs_in_t1()
 
 
 if __name__ == "__main__":
     os.system("clear")
-    # part_2a()
+    part_2a()
 
     # part_2b()
 
-    # dataset_download()
-    '''completed = 1
-    if dataset_download() == 0:
-        completed = part_3()
-    if completed == 0:
-        plot_corrs_in_t1()'''
-
-    plot_corrs_in_t1()
+    # part_3()
