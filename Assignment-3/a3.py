@@ -29,19 +29,19 @@ def part_2a():
         if events[i, 3] == 'FAMOUS' or events[i, 3] == 'UNFAMILIAR' or events[i, 3] == 'SCRAMBLED':
             ts[int(events[i, 0])] = 1
 
-    '''plt.plot(ts)
+    plt.plot(ts)
     plt.xlabel('time(seconds)')
-    plt.show()'''
+    plt.show()
 
     hrf = pd.read_csv("part1-data/hrf.csv", header=None)
     hrf = hrf.to_numpy().reshape(len(hrf),)
 
     conved = signal.convolve(ts, hrf, mode='full')
     conved = conved[0:ts.shape[0]]
-    '''plt.plot(ts)
+    plt.plot(ts)
     plt.plot(conved*3.2, linewidth=1)
     plt.xlabel('time(seconds)')
-    plt.show()'''
+    plt.show()
 
     conved = conved[0::2]
     img = fmri.get_fdata()
@@ -51,12 +51,14 @@ def part_2a():
     corrs = np.sum(meansub_img*meansub_conved, 3)/(np.sqrt(np.sum(meansub_img *
                                                                   meansub_img, 3))*np.sqrt(np.sum(meansub_conved*meansub_conved)))
     # code to display each slice Individual
-    '''for i in range(1, 47):
+    '''if not os.path.exists('part-2-output-images'):
+        os.makedirs('part-2-output-images')
+    for i in range(1, 47):
         plt.subplot(1, 1, 1)
         plt.imshow(np.rot90(corrs[:, :, i+7]),
-                   vmin=-0.25, vmax=0.25, aspect=0.7)
+                   vmin=-0.25, vmax=0.25)
         plt.title("Slice={}".format(i+7))
-        plt.savefig("part1-output-images/Slice={}".format(i+7))
+        plt.savefig("part-2-output-images/part-2-A-Slice={}".format(i+7))
         plt.show()'''
 
     axes = []
@@ -109,15 +111,16 @@ def part_2b():
                                                                   meansub_img, 3))*np.sqrt(np.sum(meansub_conved*meansub_conved)))
 
     # code to display each slice Individual
-    if not os.path.exists('part-2-B-output-images'):
-        os.makedirs('part-2-B-output-images')
+    '''if not os.path.exists('part-2-output-images'):
+        os.makedirs('part-2-output-images')
     for i in range(1, 47):
         plt.subplot(1, 1, 1)
         plt.imshow(np.rot90(corrs[:, :, i+7]),
                    vmin=-0.25, vmax=0.25)
         plt.title("Slice={}".format(i+7))
-        plt.savefig("part-2-B-output-images/Slice={}".format(i+7))
-        plt.show()
+        plt.savefig("part-2-output-images/part-2-B-Slice={}".format(i+7))
+        plt.show()'''
+
     axes = []
     fig = plt.figure(figsize=(20, 20))
 
@@ -302,8 +305,8 @@ def part_3():
 
 if __name__ == "__main__":
     os.system("clear")
-    part_2a()
+    # part_2a()
 
-    part_2b()
+    # part_2b()
 
-    # part_3()
+    part_3()
