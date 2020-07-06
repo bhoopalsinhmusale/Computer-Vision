@@ -76,9 +76,9 @@ def part_2a():
     return 0
 
 
-def part_2b(filePath="/home/divya/Desktop/Computer-Vision/Assignment-3/part1-data"):
-    fmri = nib.load('bold.nii.gz')
-    events = pd.read_csv('events.tsv', delimiter='\t')
+def part_2b():
+    fmri = nib.load('part1-data/bold.nii.gz')
+    events = pd.read_csv('part1-data/events.tsv', delimiter='\t')
     events = events.to_numpy()
     tr = fmri.header.get_zooms()[3]
     ts = np.zeros(int(tr*fmri.shape[3]))
@@ -90,8 +90,7 @@ def part_2b(filePath="/home/divya/Desktop/Computer-Vision/Assignment-3/part1-dat
     plt.xlabel('time(seconds)')
     plt.show()
 
-    hrf = pd.read_csv(
-        '/home/divya/Desktop/Computer-Vision/Assignment-3/part1-data/hrf.csv', header=None)
+    hrf = pd.read_csv('part1-data/hrf.csv', header=None)
     hrf = hrf.to_numpy().reshape(len(hrf),)
 
     conved = signal.convolve(ts, hrf, mode='full')
@@ -109,18 +108,29 @@ def part_2b(filePath="/home/divya/Desktop/Computer-Vision/Assignment-3/part1-dat
     corrs = np.sum(meansub_img*meansub_conved, 3)/(np.sqrt(np.sum(meansub_img *
                                                                   meansub_img, 3))*np.sqrt(np.sum(meansub_conved*meansub_conved)))
 
-    fig = plt.figure(figsize=(20, 20))
-    plt.axis('off')
-    for i in range(1, 6*8 + 1):
-        fig.add_subplot(8, 6, i)
-        plt.imshow(np.rot90(corrs[:, :, i+7]), vmin=-0.25, vmax=0.25)
+    # code to display each slice Individual
+    if not os.path.exists('part-2-B-output-images'):
+        os.makedirs('part-2-B-output-images')
+    for i in range(1, 47):
+        plt.subplot(1, 1, 1)
+        plt.imshow(np.rot90(corrs[:, :, i+7]),
+                   vmin=-0.25, vmax=0.25)
         plt.title("Slice={}".format(i+7))
+        plt.savefig("part-2-B-output-images/Slice={}".format(i+7))
+        plt.show()
+    axes = []
+    fig = plt.figure(figsize=(20, 20))
 
-        plt.subplots_adjust(hspace=1)
+    for a in range(6*8):
+
+        axes.append(fig.add_subplot(6, 8, a+1))
+        plt.imshow(np.rot90(corrs[:, :, a+7]),
+                   vmin=-0.25, vmax=0.25)
+
+    fig.tight_layout(rect=[0, 0.03, 1, 0.95])
+    plt.savefig("part-2-B")
     plt.suptitle(
-        "Part-2-B-localize task activation (bold.nii.gz)\nAll-Slices")
-    plt.savefig(
-        "part1-output-images/Part-2-B-localize task activation (bold.nii.gz)\nAll-Slices.png")
+        "part-2-B-localize task activation(bold.nii.gz)\nSlices-7 to 54")
     plt.show()
     return corrs
 
@@ -294,6 +304,6 @@ if __name__ == "__main__":
     os.system("clear")
     part_2a()
 
-    # part_2b()
+    part_2b()
 
     # part_3()
