@@ -140,6 +140,10 @@ no = 4  # subject count
 
 
 def dataset_download_preprocess():
+    '''
+    Funtion to automatically create directory and download all subjects from openneuro.org.
+    Adterwards it copies and execute pipeline.sh in each subject's directory
+    '''
     if not os.path.exists('part-3-data'):
         os.makedirs('part-3-data')
 
@@ -257,6 +261,9 @@ def correlation_map_registration_overlay():  # fully Automated
 
 
 def plot_corrs_in_t1():
+    '''
+    Funtion to plot all saved images from funtion correlation_map_registration_overlay() for each subject.
+    '''
     fig = plt.figure()
     print("\n"+str(os.system("pwd")))
     for r in range(1, no):
