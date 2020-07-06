@@ -136,7 +136,7 @@ def part_2b():
     return corrs
 
 
-no = 4  # subject count
+no = 7  # subject count
 
 
 def dataset_download_preprocess():
@@ -149,7 +149,7 @@ def dataset_download_preprocess():
 
     os.system("sudo chmod -R 777 './part-3-data/'")
     print("\n"+str(os.system("pwd")))
-    for i in range(1, no):
+    for i in range(1, no+1):
         i = str(i).zfill(2)
         '''if os.path.exists('part-3-data/subject{}'.format(i)):
             shutil.rmtree(
@@ -210,7 +210,7 @@ def correlation_map_registration_overlay():  # fully Automated
         "part-2-data/hrf.csv", header=None)
     hrf = hrf.to_numpy().reshape(len(hrf),)
 
-    for i in range(1, no):
+    for i in range(1, no+1):
         i = str(i).zfill(2)
         fmri = nib.load("part-3-data/subject{}/clean_bold.nii.gz".format(i))
         events = pd.read_csv(
@@ -236,13 +236,17 @@ def correlation_map_registration_overlay():  # fully Automated
 
         os.chdir("part-3-data/subject{}".format(i))
         print("\n"+str(os.system("pwd")))
+
+        # Command for brining the correlation map into the subject’s T1 space
         os.system(
             "flirt -in corrs.nii.gz -ref t1.nii.gz -applyxfm -init epireg.mat -out corrs_in_t1.nii.gz")
 
+        # Command for Opening AFNI GUI and performing all taks
         os.system("afni -com 'OPEN_WINDOW A.axialimage'\
             -com 'OPEN_WINDOW A.sagittalimage'\
             -com 'OPEN_WINDOW A.coronalimage'\
             -com 'SET_DICOM_XYZ A 17.900 62.688 1.632'\
+            -com 'SET_XHAIRS A.OFF'\
             -com 'SET_PBAR_ALL A.-5844 1.0 Spectrum:red_to_blue'\
             -com 'SWITCH_UNDERLAY t1.nii.gz+orig'\
             -com 'SEE_OVERLAY A.-'\
@@ -266,7 +270,7 @@ def plot_corrs_in_t1():
     '''
     fig = plt.figure()
     print("\n"+str(os.system("pwd")))
-    for r in range(1, no):
+    for r in range(1, no+1):
         print("\n"+str(os.system("pwd")))
 
         img = np.fliplr(mpimg.imread(
@@ -275,7 +279,7 @@ def plot_corrs_in_t1():
         plt.imshow(img)
         plt.axis('off')
         plt.title(
-            "Subject{}-axialimage.png".format(str(r).zfill(2)))
+            "Subject{}-Axial".format(str(r).zfill(2)))
         # axes[r-1, c].set_aspect(aspect=0.6)
 
         img = mpimg.imread(
@@ -283,7 +287,7 @@ def plot_corrs_in_t1():
         plt.subplot(1, 3, 2)
         plt.imshow(img)
         plt.axis('off')
-        plt.title("Subject{}-sagittalimage.png".format(str(r).zfill(2)))
+        plt.title("Subject{}-Sagittal".format(str(r).zfill(2)))
         # axes[r-1, c+1].set_aspect(aspect=0.6)
 
         img = np.fliplr(mpimg.imread(
@@ -291,7 +295,7 @@ def plot_corrs_in_t1():
         plt.subplot(1, 3, 3)
         plt.imshow(img)
         plt.axis('off')
-        plt.title("Subject{}-coronalimage.png".format(str(r).zfill(2)))
+        plt.title("Subject{}-Coronal".format(str(r).zfill(2)))
 
         plt.suptitle("Subject{}-Final-Output".format(str(r).zfill(2)))
         plt.savefig(
@@ -329,3 +333,7 @@ if __name__ == "__main__":
     # part_2b()
 
     part_3()
+
+    # correlation_map_registration_overlay()
+
+    # dataset_download_preprocess()
