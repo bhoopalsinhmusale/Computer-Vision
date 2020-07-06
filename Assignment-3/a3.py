@@ -136,43 +136,49 @@ def part_2b():
     return corrs
 
 
+no = 4  # subject count
+
+
 def dataset_download_preprocess():
-    os.system("sudo chmod -R 777 './part2-data/'")
+    if not os.path.exists('part-3-data'):
+        os.makedirs('part-3-data')
+
+    os.system("sudo chmod -R 777 './part-3-data/'")
     print("\n"+str(os.system("pwd")))
     for i in range(1, no):
         i = str(i).zfill(2)
-        '''if os.path.exists('part2-data/subject{}'.format(i)):
+        '''if os.path.exists('part-3-data/subject{}'.format(i)):
             shutil.rmtree(
-                'part2-data/subject{}'.format(i))'''
+                'part-3-data/subject{}'.format(i))'''
 
-        if not os.path.exists('part2-data/subject{}'.format(i)):
+        if not os.path.exists('part-3-data/subject{}'.format(i)):
             os.makedirs(
-                'part2-data/subject{}'.format(i))
+                'part-3-data/subject{}'.format(i))
         # os.chdir(
-        #    "/home/divya/Desktop/Computer-Vision/Assignment-3/part2-data/subject{}".format(i))
+        #    "/home/divya/Desktop/Computer-Vision/Assignment-3/part-3-data/subject{}".format(i))
         # print("\n"+str(os.system("pwd")))
 
         copyfile("part1-data/pipeline.sh",
-                 "part2-data/subject{}/pipeline.sh".format(i))
-        if not os.path.exists('part2-data/subject{}/t1.nii.gz'.format(i)):
+                 "part-3-data/subject{}/pipeline.sh".format(i))
+        if not os.path.exists('part-3-data/subject{}/t1.nii.gz'.format(i)):
             T1_url = "https://openneuro.org/crn/datasets/ds000117/snapshots/1.0.3/files/sub-{}:ses-mri:anat:sub-{}_ses-mri_acq-mprage_T1w.nii.gz".format(
                 i, i)
             wget.download(
-                T1_url, 'part2-data/subject{}/t1.nii.gz'.format(i))
+                T1_url, 'part-3-data/subject{}/t1.nii.gz'.format(i))
 
-        if not os.path.exists('part2-data/subject{}/bold.nii.gz'.format(i)):
+        if not os.path.exists('part-3-data/subject{}/bold.nii.gz'.format(i)):
             bold_url = "https://openneuro.org/crn/datasets/ds000117/snapshots/1.0.3/files/sub-{}:ses-mri:func:sub-{}_ses-mri_task-facerecognition_run-01_bold.nii.gz".format(
                 i, i)
             wget.download(
-                bold_url, 'part2-data/subject{}/bold.nii.gz'.format(i))
+                bold_url, 'part-3-data/subject{}/bold.nii.gz'.format(i))
 
-        if not os.path.exists('part2-data/subject{}/events.tsv'.format(i)):
+        if not os.path.exists('part-3-data/subject{}/events.tsv'.format(i)):
             even_url = "https://openneuro.org/crn/datasets/ds000117/snapshots/1.0.3/files/sub-{}:ses-mri:func:sub-{}_ses-mri_task-facerecognition_run-01_events.tsv".format(
                 i, i)
             wget.download(
-                even_url, 'part2-data/subject{}/events.tsv'.format(i))
+                even_url, 'part-3-data/subject{}/events.tsv'.format(i))
 
-        os.chdir("part2-data/subject{}".format(i))
+        os.chdir("part-3-data/subject{}".format(i))
         print("\n"+str(os.system("pwd")))
 
         os.system("sudo chmod -R 777 './'".format(i))
@@ -202,9 +208,9 @@ def correlation_map_registration_overlay():  # fully Automated
 
     for i in range(1, no):
         i = str(i).zfill(2)
-        fmri = nib.load("part2-data/subject{}/clean_bold.nii.gz".format(i))
+        fmri = nib.load("part-3-data/subject{}/clean_bold.nii.gz".format(i))
         events = pd.read_csv(
-            "part2-data/subject{}/events.tsv".format(i), delimiter='\t')
+            "part-3-data/subject{}/events.tsv".format(i), delimiter='\t')
         events = events.to_numpy()
         tr = fmri.header.get_zooms()[3]
         ts = np.zeros(int(tr*fmri.shape[3]))
@@ -222,9 +228,9 @@ def correlation_map_registration_overlay():  # fully Automated
                                                                       meansub_img, 3))*np.sqrt(np.sum(meansub_conved*meansub_conved)))
 
         corrs_nifti = nib.Nifti1Image(corrs, fmri.affine)
-        nib.save(corrs_nifti, "part2-data/subject{}/corrs.nii.gz".format(i))
+        nib.save(corrs_nifti, "part-3-data/subject{}/corrs.nii.gz".format(i))
 
-        os.chdir("part2-data/subject{}".format(i))
+        os.chdir("part-3-data/subject{}".format(i))
         print("\n"+str(os.system("pwd")))
         os.system(
             "flirt -in corrs.nii.gz -ref t1.nii.gz -applyxfm -init epireg.mat -out corrs_in_t1.nii.gz")
@@ -257,7 +263,7 @@ def plot_corrs_in_t1():
         print("\n"+str(os.system("pwd")))
 
         img = np.fliplr(mpimg.imread(
-            "part2-data/subject{}/axialimage.png".format(str(r).zfill(2))))
+            "part-3-data/subject{}/axialimage.png".format(str(r).zfill(2))))
         plt.subplot(1, 3, 1)
         plt.imshow(img)
         plt.axis('off')
@@ -266,7 +272,7 @@ def plot_corrs_in_t1():
         # axes[r-1, c].set_aspect(aspect=0.6)
 
         img = mpimg.imread(
-            "part2-data/subject{}/sagittalimage.png".format(str(r).zfill(2)))
+            "part-3-data/subject{}/sagittalimage.png".format(str(r).zfill(2)))
         plt.subplot(1, 3, 2)
         plt.imshow(img)
         plt.axis('off')
@@ -274,7 +280,7 @@ def plot_corrs_in_t1():
         # axes[r-1, c+1].set_aspect(aspect=0.6)
 
         img = np.fliplr(mpimg.imread(
-            "part2-data/subject{}/coronalimage.png".format(str(r).zfill(2))))
+            "part-3-data/subject{}/coronalimage.png".format(str(r).zfill(2))))
         plt.subplot(1, 3, 3)
         plt.imshow(img)
         plt.axis('off')
@@ -282,7 +288,7 @@ def plot_corrs_in_t1():
 
         plt.suptitle("Subject{}-Final-Output".format(str(r).zfill(2)))
         plt.savefig(
-            "part2-data/subject{}/Subject{}-Final-Output".format(str(r).zfill(2), str(r).zfill(2)))
+            "part-3-data/subject{}/Subject{}-Final-Output".format(str(r).zfill(2), str(r).zfill(2)))
         plt.show()
     return 0
 
