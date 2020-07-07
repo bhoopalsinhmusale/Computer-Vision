@@ -279,7 +279,7 @@ def plot_corrs_in_t1():
         plt.imshow(img)
         plt.axis('off')
         plt.title(
-            "Subject{}-Axial".format(str(r).zfill(2)))
+            "Axial".format(str(r).zfill(2)))
         # axes[r-1, c].set_aspect(aspect=0.6)
 
         img = mpimg.imread(
@@ -287,7 +287,7 @@ def plot_corrs_in_t1():
         plt.subplot(1, 3, 2)
         plt.imshow(img)
         plt.axis('off')
-        plt.title("Subject{}-Sagittal".format(str(r).zfill(2)))
+        plt.title("Sagittal".format(str(r).zfill(2)))
         # axes[r-1, c+1].set_aspect(aspect=0.6)
 
         img = np.fliplr(mpimg.imread(
@@ -295,12 +295,100 @@ def plot_corrs_in_t1():
         plt.subplot(1, 3, 3)
         plt.imshow(img)
         plt.axis('off')
-        plt.title("Subject{}-Coronal".format(str(r).zfill(2)))
+        plt.title("Coronal".format(str(r).zfill(2)))
 
-        plt.suptitle("Subject{}-Final-Output".format(str(r).zfill(2)))
+        plt.suptitle("Subject{}".format(str(r).zfill(2)))
         plt.savefig(
-            "part-3-data/subject{}/Subject{}-Final-Output".format(str(r).zfill(2), str(r).zfill(2)))
+            "Subject{}".format(str(r).zfill(2), str(r).zfill(2)))
         plt.show()
+    return 0
+
+
+def group_average():
+    os.system("sudo chmod -R 777 './part-3-data'")
+    for i in range(1, no+1):
+        i = str(i).zfill(2)
+        copyfile("part-2-data/MNI152_2009_template.nii.gz",
+                 "part-3-data/subject{}/MNI152_2009_template.nii.gz".format(i))
+        os.chdir("part-3-data/subject{}".format(i))
+        print("\n"+str(os.system("pwd")))
+        if not os.path.exists('corrs_in_MNI152.nii.gz'):
+            os.system(
+                "fslsplit MNI152_2009_template.nii.gz Resized_MNI152_2009_template")
+
+            os.system(
+
+                "flirt -in bet.nii.gz -ref Resized_MNI152_2009_template0000.nii.gz -out t1_in_MNI152.nii -omat MNI152.mat")
+            os.system(
+                "flirt -in corrs_in_t1.nii.gz -ref Resized_MNI152_2009_template0000.nii.gz -applyxfm -init MNI152.mat -out corrs_in_MNI152.nii.gz")
+        os.chdir("..")
+        os.chdir("..")
+    print("\n"+str(os.system("pwd")))
+
+    os.system(
+        "3dMean -prefix grand_avgerage.nii.gz part-3-data/subject01/corrs_in_MNI152.nii.gz\
+                part-3-data/subject02/corrs_in_MNI152.nii.gz\
+                part-3-data/subject03/corrs_in_MNI152.nii.gz\
+                part-3-data/subject04/corrs_in_MNI152.nii.gz\
+                part-3-data/subject05/corrs_in_MNI152.nii.gz\
+                part-3-data/subject06/corrs_in_MNI152.nii.gz\
+                part-3-data/subject07/corrs_in_MNI152.nii.gz\
+                part-3-data/subject08/corrs_in_MNI152.nii.gz\
+                part-3-data/subject09/corrs_in_MNI152.nii.gz\
+                part-3-data/subject10/corrs_in_MNI152.nii.gz\
+                part-3-data/subject11/corrs_in_MNI152.nii.gz\
+                part-3-data/subject12/corrs_in_MNI152.nii.gz\
+                part-3-data/subject13/corrs_in_MNI152.nii.gz\
+                part-3-data/subject14/corrs_in_MNI152.nii.gz\
+                part-3-data/subject15/corrs_in_MNI152.nii.gz\
+                part-3-data/subject16/corrs_in_MNI152.nii.gz -overwrite")
+    copyfile("part-2-data/MNI152_2009_template.nii.gz",
+             "MNI152_2009_template.nii.gz")
+
+    # Command for Opening AFNI GUI and performing all taks
+    os.system("afni -com 'OPEN_WINDOW A.axialimage'\
+            -com 'OPEN_WINDOW A.sagittalimage'\
+            -com 'OPEN_WINDOW A.coronalimage'\
+            -com 'SET_DICOM_XYZ A 0 42 48'\
+            -com 'SET_PBAR_ALL A.-1981 1.0 Spectrum:red_to_blue FLIP'\
+            -com 'SWITCH_UNDERLAY MNI152_2009_template.nii.gz+tlrc'\
+            -com 'SEE_OVERLAY A.-'\
+            -com 'SWITCH_OVERLAY grand_avgerage.nii.gz+tlrc'\
+            -com 'SEE_OVERLAY A.+'\
+            -com 'SET_THRESHOLD A.00812 1'\
+            -com 'SAVE_PNG A.axialimage grand_avgerage_axialimage.png blowup=5'\
+            -com 'SAVE_PNG A.sagittalimage grand_avgerage_sagittalimage.png blowup=5'\
+            -com 'SAVE_PNG A.coronalimage grand_avgerage_coronalimage.png blowup=5'\
+            -com 'QUIT'")
+    fig = plt.figure()
+    img = np.fliplr(mpimg.imread(
+        "grand_avgerage_axialimage.png"))
+    plt.subplot(1, 3, 1)
+    plt.imshow(img)
+    plt.axis('off')
+    plt.title(
+        "Axial")
+    # axes[r-1, c].set_aspect(aspect=0.6)
+
+    img = mpimg.imread(
+        "grand_avgerage_sagittalimage.png")
+    plt.subplot(1, 3, 2)
+    plt.imshow(img)
+    plt.axis('off')
+    plt.title("Sagittal")
+    # axes[r-1, c+1].set_aspect(aspect=0.6)
+
+    img = np.fliplr(mpimg.imread(
+        "grand_avgerage_coronalimage.png"))
+    plt.subplot(1, 3, 3)
+    plt.imshow(img)
+    plt.axis('off')
+    plt.title("Coronal")
+
+    plt.suptitle("Grand-Average-Output")
+    plt.savefig(
+        "Grand-Average-Output")
+    plt.show()
     return 0
 
 
@@ -322,6 +410,12 @@ def part_3():
     print("plot_corrs_in_t1 is running.")
     thread.join()
     print("plot_corrs_in_t1 thread has finished.")
+
+    thread = threading.Thread(target=group_average)
+    thread.start()
+    print("group_average is running.")
+    thread.join()
+    print("group_average thread has finished.")
 
 
 if __name__ == "__main__":
