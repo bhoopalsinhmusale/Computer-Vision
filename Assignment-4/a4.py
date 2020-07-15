@@ -11,12 +11,31 @@ def part_1():
     img = mpimg.imread(images[0])
     fig, ax = plt.subplots(1)
     ax.imshow(img, cmap='gray')
-    ax.set_title("{}".format(images[0]))
 
-    rect = patches.Rectangle(
-        (10, 90), 25, 25, linewidth=1, edgecolor='r', facecolor='none')
-    ax.add_patch(rect)
+    x = 10
+    y = 50
+    height, width = 40, 40
+    noise_patch = patches.Rectangle(
+        (x, y), width, height, linewidth=1, edgecolor='r', facecolor='none')
+    ax.add_patch(noise_patch)
+    noise_patch = np.copy(img[y:y+height, x:x+width])
 
+    x = 90
+    y = 80
+    signal_patch = patches.Rectangle(
+        (x, y), width, height, linewidth=1, edgecolor='g', facecolor='none')
+    ax.add_patch(signal_patch)
+    signal_patch = np.copy(img[y:y+height, x:x+width])
+
+    snr = np.mean(signal_patch) / np.std(noise_patch)
+    ax.set_title("SNR={}".format(snr))
+
+    plt.show()
+
+    plt.subplot(1, 2, 1)
+    plt.imshow(noise_patch, cmap='gray')
+    plt.subplot(1, 2, 2)
+    plt.imshow(signal_patch, cmap='gray')
     plt.show()
 
 
