@@ -12,9 +12,9 @@ def part_1():
     fig, ax = plt.subplots(1)
     ax.imshow(img, cmap='gray')
 
-    x = 10
+    x = 0
     y = 50
-    height, width = 40, 40
+    height, width = 40, 50
     noise_patch = patches.Rectangle(
         (x, y), width, height, linewidth=1, edgecolor='r', facecolor='none')
     ax.add_patch(noise_patch)
@@ -28,15 +28,15 @@ def part_1():
     signal_patch = np.copy(img[y:y+height, x:x+width])
 
     snr = np.mean(signal_patch) / np.std(noise_patch)
-    ax.set_title("SNR={}".format(snr))
+    ax.set_title("SNR=%.2f" % snr)
 
     plt.show()
 
-    plt.subplot(1, 2, 1)
+    '''plt.subplot(1, 2, 1)
     plt.imshow(noise_patch, cmap='gray')
     plt.subplot(1, 2, 2)
     plt.imshow(signal_patch, cmap='gray')
-    plt.show()
+    plt.show()'''
 
 
 if __name__ == "__main__":
