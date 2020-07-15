@@ -62,7 +62,7 @@ def my_bilateral_filter(src, window_size=5, sigma_d=5, sigma_r=50):
 def part_1():
     if not os.path.exists('part-1-output-images'):
         os.makedirs('part-1-output-images')
-    images = ["t1.png"]  # ,  "t1_v2.png",  "t1_v3.png", "t2.png", "flair.png"]
+    images = ["t1.png",  "t1_v2.png",  "t1_v3.png", "t2.png", "flair.png"]
     for i in images:
         img = cv2.imread(i, 0)
         print(img.shape)
