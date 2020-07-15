@@ -14,7 +14,7 @@ def part_1():
     ax.set_title("{}".format(images[0]))
 
     rect = patches.Rectangle(
-        (10, 90), 50, 50, linewidth=1, edgecolor='r', facecolor='none')
+        (10, 90), 25, 25, linewidth=1, edgecolor='r', facecolor='none')
     ax.add_patch(rect)
 
     plt.show()
