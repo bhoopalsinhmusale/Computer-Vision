@@ -137,7 +137,60 @@ def part_1():
     plt.show()'''
 
 
+def otsu(gray):
+    pixel_number = gray.shape[0] * gray.shape[1]
+    mean_weigth = 1.0/pixel_number
+    his, bins = np.histogram(gray, np.arange(0, 257))
+    final_thresh = -1
+    final_value = -1
+    intensity_arr = np.arange(256)
+    # This goes from 1 to 254 uint8 range (Pretty sure wont be those values)
+    for t in bins[1:-1]:
+        pcb = np.sum(his[:t])
+        pcf = np.sum(his[t:])
+        Wb = pcb * mean_weigth
+        Wf = pcf * mean_weigth
+
+        mub = np.sum(intensity_arr[:t]*his[:t]) / float(pcb)
+        muf = np.sum(intensity_arr[t:]*his[t:]) / float(pcf)
+        # print mub, muf
+        value = Wb * Wf * (mub - muf) ** 2
+
+        if value > final_value:
+            final_thresh = t
+            final_value = value
+    final_img = gray.copy()
+    print(final_thresh)
+    final_img[gray > final_thresh] = 255
+    final_img[gray < final_thresh] = 0
+    return final_img
+
+
+def part_2():
+    if not os.path.exists('part-2-output-images'):
+        os.makedirs('part-2-output-images')
+    images = ["t1.png",  "t1_v2.png",  "t1_v3.png", "t2.png", "flair.png"]
+    for i in images:
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 8))
+        img = cv2.imread(i, 0)
+        output_img = otsu(img)
+        # plt.subplot(121)
+        ax1.imshow(img, cmap='gray')
+        ax1.set_title(i)
+
+        # plt.subplot(122)
+        #plt.imshow(img, cmap='jet', interpolation='none', alpha=0.7)
+        ax2.imshow(output_img, cmap='gray')
+        ax2.set_title("Otsu’s method Output")
+        plt.savefig(
+            "part-2-output-images/Output-{}".format(i))
+        plt.suptitle("Part-2 : Segmentation")
+        plt.show()
+
+
 if __name__ == "__main__":
     os.system("cls")
 
-    part_1()
+    # part_1()
+
+    part_2()
