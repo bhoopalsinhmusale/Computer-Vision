@@ -1,7 +1,5 @@
-import nibabel as nb
-import nighres
-import nibabel as nib
 import cv2
+import nibabel as nib
 import math
 import numpy as np
 import matplotlib.pyplot as plt
@@ -186,7 +184,7 @@ def part_2():
         ax1.set_title(i)
 
         # plt.subplot(122)
-        #plt.imshow(img, cmap='jet', interpolation='none', alpha=0.7)
+        # plt.imshow(img, cmap='jet', interpolation='none', alpha=0.7)
         ax2.imshow(output_img, cmap='gray')
         ax2.set_title("Otsu’s method Output")
         plt.savefig(
@@ -207,30 +205,26 @@ def part_3():
         plt.draw()
         plt.waitforbuttonpress(0)
         plt.close()
-
+    '''
     plt.subplot(1, 2, 1)
-    filtered_image = my_bilateral_filter(tof_im[slice, :, :], 5, 12.0, 16.0)
+    img = cv2.imread("t1.png", 0)
+    print(img.shape)
+    '''filtered_image = my_bilateral_filter(img, 5, 12.0, 16.0)
     plt.imshow(np.flip(filtered_image).T, cmap='gray')
     plt.title("Filter")
-
 
     plt.subplot(1, 2, 2)
     output_img = my_otsu(filtered_image)
     plt.imshow(np.flip(output_img).T, cmap='gray')
-    plt.title("Otsu’s method Output")
+    plt.title("Otsu’s method Output")'''
 
     plt.draw()
     plt.waitforbuttonpress(0)
-    plt.close()'''
-
-    in_dir = os.path.join(os.getcwd(), 'nighres_examples/data_sets')
-
-    out_dir = os.path.join(
-        os.getcwd(), 'nighres_examples/vascular_reconstruction')
+    plt.close()
 
 
 if __name__ == "__main__":
-    os.system("cls")
+    os.system("clear")
 
     # part_1()
 
