@@ -1,3 +1,6 @@
+import nibabel as nb
+import nighres
+import nibabel as nib
 import cv2
 import math
 import numpy as np
@@ -16,6 +19,7 @@ def my_bilateral_filter(src, window_size=5, sigma_d=5, sigma_r=50):
     window_size : window size
     sigma_d : smoothing weight factor
     sigma_r : range weight factor
+    retruns : filtered output image
     '''
     height = src.shape[0]
     width = src.shape[1]
@@ -137,14 +141,17 @@ def part_1():
     plt.show()'''
 
 
-def otsu(gray):
-    pixel_number = gray.shape[0] * gray.shape[1]
+def my_otsu(src):
+    '''
+    src : input image
+    returns segmented output image
+    '''
+    pixel_number = src.shape[0] * src.shape[1]
     mean_weigth = 1.0/pixel_number
-    his, bins = np.histogram(gray, np.arange(0, 257))
+    his, bins = np.histogram(src, np.arange(0, 257))
     final_thresh = -1
     final_value = -1
     intensity_arr = np.arange(256)
-    # This goes from 1 to 254 uint8 range (Pretty sure wont be those values)
     for t in bins[1:-1]:
         pcb = np.sum(his[:t])
         pcf = np.sum(his[t:])
@@ -159,11 +166,11 @@ def otsu(gray):
         if value > final_value:
             final_thresh = t
             final_value = value
-    final_img = gray.copy()
+    output_img = src.copy()
     print(final_thresh)
-    final_img[gray > final_thresh] = 255
-    final_img[gray < final_thresh] = 0
-    return final_img
+    output_img[src > final_thresh] = 255
+    output_img[src < final_thresh] = 0
+    return output_img
 
 
 def part_2():
@@ -173,7 +180,7 @@ def part_2():
     for i in images:
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 8))
         img = cv2.imread(i, 0)
-        output_img = otsu(img)
+        output_img = my_otsu(img)
         # plt.subplot(121)
         ax1.imshow(img, cmap='gray')
         ax1.set_title(i)
@@ -188,9 +195,45 @@ def part_2():
         plt.show()
 
 
+def part_3():
+    '''epi_image = nib.load('part-3-data/tof.nii')
+    tof_im = epi_image.get_data()
+
+    slice = 190
+    for i in range(10, 200, 10):
+        plt.subplot(1, 1, 1)
+        plt.imshow(np.flip(tof_im[i, :, :]).T, cmap='gray')
+        plt.title(i)
+        plt.draw()
+        plt.waitforbuttonpress(0)
+        plt.close()
+
+    plt.subplot(1, 2, 1)
+    filtered_image = my_bilateral_filter(tof_im[slice, :, :], 5, 12.0, 16.0)
+    plt.imshow(np.flip(filtered_image).T, cmap='gray')
+    plt.title("Filter")
+
+
+    plt.subplot(1, 2, 2)
+    output_img = my_otsu(filtered_image)
+    plt.imshow(np.flip(output_img).T, cmap='gray')
+    plt.title("Otsu’s method Output")
+
+    plt.draw()
+    plt.waitforbuttonpress(0)
+    plt.close()'''
+
+    in_dir = os.path.join(os.getcwd(), 'nighres_examples/data_sets')
+
+    out_dir = os.path.join(
+        os.getcwd(), 'nighres_examples/vascular_reconstruction')
+
+
 if __name__ == "__main__":
     os.system("cls")
 
     # part_1()
 
-    part_2()
+    # part_2()
+
+    part_3()
