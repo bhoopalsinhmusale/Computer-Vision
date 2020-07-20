@@ -1,3 +1,5 @@
+import nilearn
+from nistats.thresholding import map_threshold
 import cv2
 import nibabel as nib
 import math
@@ -5,6 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import os
+
 
 import matplotlib.patches as patches
 from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -194,33 +197,41 @@ def part_2():
 
 
 def part_3():
-    '''epi_image = nib.load('part-3-data/tof.nii')
-    tof_im = epi_image.get_data()
+    slice = 243
+    epi_image = nib.load('part-3-data/tof.nii')
+    img = epi_image.get_data()
+    #img = cv2.imread(img, 0)
+    #blur = cv2.GaussianBlur(img, (5, 5), 0)
+    #ret3, th3 = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
 
-    slice = 190
-    for i in range(10, 200, 10):
-        plt.subplot(1, 1, 1)
-        plt.imshow(np.flip(tof_im[i, :, :]).T, cmap='gray')
-        plt.title(i)
-        plt.draw()
-        plt.waitforbuttonpress(0)
-        plt.close()
-    '''
-    plt.subplot(1, 2, 1)
-    img = cv2.imread("t1.png", 0)
-    print(img.shape)
-    '''filtered_image = my_bilateral_filter(img, 5, 12.0, 16.0)
-    plt.imshow(np.flip(filtered_image).T, cmap='gray')
-    plt.title("Filter")
-
-    plt.subplot(1, 2, 2)
-    output_img = my_otsu(filtered_image)
-    plt.imshow(np.flip(output_img).T, cmap='gray')
-    plt.title("Otsu’s method Output")'''
+    plt.imshow(img[slice, :, :], cmap='gray')
+    # plt.imshow(np.flip(tof_im[slice, :, :]).T, cmap='gray')
 
     plt.draw()
     plt.waitforbuttonpress(0)
     plt.close()
+
+
+''''img = cv2.imread("part-3-data/new_tog.png", 0)
+    print(img.shape)
+    plt.subplot(1, 2, 1)
+filtered_image = my_bilateral_filter(img, 5, 12.0, 16.0)
+plt.imshow(filtered_image, cmap='gray')
+plt.title("Filter")'''
+
+'''plt.subplot(1, 2, 1)
+    plt.imshow(img, cmap='gray')
+
+    plt.subplot(1, 2, 2)
+    th = 82
+    desired_th = th*1.2
+    _, output_img = cv2.threshold(img, desired_th, 255, cv2.THRESH_BINARY)
+    plt.imshow(output_img, cmap='gray')
+    plt.title("Otsu’s method Output")
+
+    plt.draw()
+    plt.waitforbuttonpress(0)
+    plt.close()'''
 
 
 if __name__ == "__main__":
