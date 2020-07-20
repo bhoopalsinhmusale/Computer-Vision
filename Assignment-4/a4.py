@@ -1,5 +1,4 @@
-import nilearn
-from nistats.thresholding import map_threshold
+
 import cv2
 import nibabel as nib
 import math
@@ -24,9 +23,7 @@ def my_bilateral_filter(src, window_size=5, sigma_d=5, sigma_r=50):
     '''
     height = src.shape[0]
     width = src.shape[1]
-    # Initialize the filtered image:
     filtered_image = np.empty([height, width])
-    # Starting looping and processing the orginal noisy and assigning values to the new filtered image
     window_boundary = int(np.ceil(window_size/2))
     for i in range(height):
         for j in range(width):
@@ -36,9 +33,7 @@ def my_bilateral_filter(src, window_size=5, sigma_d=5, sigma_r=50):
 
             for k in range(i - window_boundary, i + window_boundary):
                 for l in range(j - window_boundary, j + window_boundary):
-                    # Apply window boundary conditions
                     if (k >= 0 and k < height and l >= 0 and l < width):
-                        # Calculate smoothing weight :
                         smoothing_weight_dist = math.sqrt(
                             np.power((i - k), 2) + np.power((j - l), 2))
                         smoothing_weight = math.exp(
@@ -135,12 +130,6 @@ def part_1():
         plt.suptitle("Part-1 : Denoising")
         plt.show()
 
-    '''plt.subplot(1, 2, 1)
-    plt.imshow(noise_patch, cmap='gray')
-    plt.subplot(1, 2, 2)
-    plt.imshow(signal_patch, cmap='gray')
-    plt.show()'''
-
 
 def my_otsu(src):
     '''
@@ -161,14 +150,13 @@ def my_otsu(src):
 
         mub = np.sum(intensity_arr[:t]*his[:t]) / float(pcb)
         muf = np.sum(intensity_arr[t:]*his[t:]) / float(pcf)
-        # print mub, muf
         value = Wb * Wf * (mub - muf) ** 2
 
         if value > final_value:
             final_thresh = t
             final_value = value
     output_img = src.copy()
-    print(final_thresh)
+    print("Final Threshold={}".format(final_thresh))
     output_img[src > final_thresh] = 255
     output_img[src < final_thresh] = 0
     return output_img
@@ -200,45 +188,13 @@ def part_3():
     slice = 243
     epi_image = nib.load('part-3-data/tof.nii')
     img = epi_image.get_data()
-    #img = cv2.imread(img, 0)
-    #blur = cv2.GaussianBlur(img, (5, 5), 0)
-    #ret3, th3 = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-
-    plt.imshow(img[slice, :, :], cmap='gray')
-    # plt.imshow(np.flip(tof_im[slice, :, :]).T, cmap='gray')
-
-    plt.draw()
-    plt.waitforbuttonpress(0)
-    plt.close()
-
-
-''''img = cv2.imread("part-3-data/new_tog.png", 0)
-    print(img.shape)
-    plt.subplot(1, 2, 1)
-filtered_image = my_bilateral_filter(img, 5, 12.0, 16.0)
-plt.imshow(filtered_image, cmap='gray')
-plt.title("Filter")'''
-
-'''plt.subplot(1, 2, 1)
-    plt.imshow(img, cmap='gray')
-
-    plt.subplot(1, 2, 2)
-    th = 82
-    desired_th = th*1.2
-    _, output_img = cv2.threshold(img, desired_th, 255, cv2.THRESH_BINARY)
-    plt.imshow(output_img, cmap='gray')
-    plt.title("Otsu’s method Output")
-
-    plt.draw()
-    plt.waitforbuttonpress(0)
-    plt.close()'''
 
 
 if __name__ == "__main__":
-    os.system("clear")
+    os.system("cls")
 
     # part_1()
 
     # part_2()
 
-    part_3()
+    # part_3()
