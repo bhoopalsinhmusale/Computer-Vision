@@ -1,4 +1,5 @@
 
+from nipype.interfaces import fsl
 import cv2
 import nibabel as nib
 import math
@@ -186,15 +187,50 @@ def part_2():
 
 def part_3():
     slice = 243
-    epi_image = nib.load('part-3-data/tof.nii')
+    os.system("sudo chmod -R 777 './part-3-data/'")
+
+    os.chdir("part-3-data/")
+    print(os.system("pwd"))
+
+    btr = fsl.BET()
+    btr.inputs.in_file = 'tof.nii'
+    btr.inputs.frac = 0.03
+    btr.inputs.vertical_gradient = 0.7
+    btr.inputs.out_file = 'ss_tof.nii'
+    res = btr.run()
+
+    epi_image = nib.load('tof.nii')
     img = epi_image.get_data()
+    plt.subplot(2, 1, 1)
+    plt.imshow(img[slice, :, :].T, cmap='gray')
+    plt.title("Orginal tof.nii")
+
+    epi_image = nib.load('ss_tof.nii.gz')
+    img = epi_image.get_data()
+    plt.subplot(2, 1, 2)
+    plt.imshow(img[slice, :, :].T,  cmap='gray')
+    plt.title("Skull Stripped")
+
+    epi_image = nib.load('swi.nii')
+    img = epi_image.get_data()
+    plt.subplot(2, 2, 1)
+    plt.imshow(img[slice, :, :].T, cmap='gray')
+    plt.title("Orginal swi.nii")
+
+    epi_image = nib.load('ss_swi.nii.gz')
+    img = epi_image.get_data()
+    plt.subplot(2, 2, 2)
+    plt.imshow(img[slice, :, :].T,  cmap='gray')
+    plt.title("Skull Stripped")
+
+    plt.show()
 
 
 if __name__ == "__main__":
-    os.system("cls")
+    os.system("clear")
 
     # part_1()
 
     # part_2()
 
-    # part_3()
+    part_3()
