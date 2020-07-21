@@ -1,5 +1,5 @@
-
-from nipype.interfaces import fsl
+from dipy.denoise.noise_estimate import estimate_sigma
+from dipy.denoise.nlmeans import nlmeans
 import cv2
 import nibabel as nib
 import math
@@ -7,8 +7,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import os
-
-
 import matplotlib.patches as patches
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 plt.rcParams.update({'font.size': 10})
@@ -186,19 +184,21 @@ def part_2():
 
 
 def part_3():
+
     slice = 243
     os.system("sudo chmod -R 777 './part-3-data/'")
 
     os.chdir("part-3-data/")
     print(os.system("pwd"))
 
-    '''if not os.path.exists('ss_tof.nii'):
+    # Skull Stripping of tof.nii
+    if not os.path.exists('ss_tof.nii'):
         btr = fsl.BET()
         btr.inputs.in_file = 'tof.nii'
         btr.inputs.frac = 0.03
         btr.inputs.vertical_gradient = 0.7
         btr.inputs.out_file = 'ss_tof.nii'
-        res = btr.run()'''
+        res = btr.run()
 
     epi_image = nib.load('tof.nii')
     img = epi_image.get_data()
@@ -212,14 +212,13 @@ def part_3():
     plt.imshow(img[slice, :, :].T,  cmap='gray')
     plt.title("Skull Stripped")
 
+    # Skull Stripping of swi.nii
     if not os.path.exists('ss_swi.nii.gz'):
-        a = a
-
-    btr = fsl.BET()
-    btr.inputs.in_file = 'swi.nii'
-    btr.inputs.frac = 0.04
-    btr.inputs.out_file = 'ss_swi.nii'
-    res = btr.run()
+        btr = fsl.BET()
+        btr.inputs.in_file = 'swi.nii'
+        btr.inputs.frac = 0.04
+        btr.inputs.out_file = 'ss_swi.nii'
+        res = btr.run()
 
     slice = 250
     epi_image = nib.load('swi.nii')
@@ -238,12 +237,34 @@ def part_3():
     plt.waitforbuttonpress(0)
     plt.close()
 
+    # Denoising of tof.nii using dipy
+    epi_image = nib.load('ss_tof.nii.gz')
+    ss_tof_img = epi_image.get_data()
+    sigma = estimate_sigma(ss_tof_img, N=16)
+    clear_ss_tof_img = nlmeans(ss_tof_img, sigma)
+    nifti_img = nib.Nifti1Image(clear_ss_tof_img, epi_image.affine)
+    nib.save(nifti_img, "clear_ss_tof_img.nii.gz")
+
+    # Denoising of swi.nii using dipy
+    epi_image = nib.load('ss_swi.nii.gz')
+    ss_swi_img = epi_image.get_data()
+    sigma = estimate_sigma(ss_swi_img, N=16)
+    clear_ss_swi_img = nlmeans(ss_swi_img, sigma)
+    nifti_img = nib.Nifti1Image(clear_ss_swi_img, epi_image.affine)
+    nib.save(nifti_img, "clear_ss_swi_img.nii.gz")
+
+    #############################################
+    #                                           #
+    #  Code for Segmenting arterial and venous  #
+    #                                           #
+    #############################################
+
 
 if __name__ == "__main__":
     os.system("clear")
 
-    # part_1()
+    part_1()
 
-    # part_2()
+    part_2()
 
     part_3()
