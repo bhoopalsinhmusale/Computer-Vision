@@ -259,6 +259,9 @@ def part_3():
     #                                           #
     #############################################
 
+    os.chdir("..")
+    print(os.system("pwd"))
+
 
 if __name__ == "__main__":
     os.system("clear")
