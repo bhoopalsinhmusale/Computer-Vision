@@ -192,38 +192,49 @@ def part_3():
     os.chdir("part-3-data/")
     print(os.system("pwd"))
 
-    btr = fsl.BET()
-    btr.inputs.in_file = 'tof.nii'
-    btr.inputs.frac = 0.03
-    btr.inputs.vertical_gradient = 0.7
-    btr.inputs.out_file = 'ss_tof.nii'
-    res = btr.run()
+    if not os.path.exists('ss_tof.nii'):
+        btr = fsl.BET()
+        btr.inputs.in_file = 'tof.nii'
+        btr.inputs.frac = 0.03
+        btr.inputs.vertical_gradient = 0.7
+        btr.inputs.out_file = 'ss_tof.nii'
+        res = btr.run()
 
     epi_image = nib.load('tof.nii')
     img = epi_image.get_data()
-    plt.subplot(2, 1, 1)
+    plt.subplot(2, 2, 1)
     plt.imshow(img[slice, :, :].T, cmap='gray')
     plt.title("Orginal tof.nii")
 
     epi_image = nib.load('ss_tof.nii.gz')
     img = epi_image.get_data()
-    plt.subplot(2, 1, 2)
-    plt.imshow(img[slice, :, :].T,  cmap='gray')
-    plt.title("Skull Stripped")
-
-    epi_image = nib.load('swi.nii')
-    img = epi_image.get_data()
-    plt.subplot(2, 2, 1)
-    plt.imshow(img[slice, :, :].T, cmap='gray')
-    plt.title("Orginal swi.nii")
-
-    epi_image = nib.load('ss_swi.nii.gz')
-    img = epi_image.get_data()
     plt.subplot(2, 2, 2)
     plt.imshow(img[slice, :, :].T,  cmap='gray')
     plt.title("Skull Stripped")
 
-    plt.show()
+    if not os.path.exists('ss_swi.nii.gz'):
+        btr = fsl.BET()
+        btr.inputs.in_file = 'swi.nii'
+        btr.inputs.frac = 0.03
+        btr.inputs.out_file = 'ss_swi.nii'
+        res = btr.run()
+
+    slice = 250
+    epi_image = nib.load('swi.nii')
+    img = epi_image.get_data()
+    plt.subplot(2, 2, 3)
+    plt.imshow(np.flip(img[slice, :, :]), cmap='gray')
+    plt.title("Orginal swi.nii")
+
+    epi_image = nib.load('ss_swi.nii.gz')
+    img = epi_image.get_data()
+    plt.subplot(2, 2, 4)
+    plt.imshow(img[slice, :, :],  cmap='gray')
+    plt.title("Skull Stripped")
+
+    plt.draw()
+    plt.waitforbuttonpress(0)
+    plt.close()
 
 
 if __name__ == "__main__":
