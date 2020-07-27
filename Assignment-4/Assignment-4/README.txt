@@ -1,6 +1,5 @@
 
-Incomplete part:
-1. Part-3 half done.
+Completed all parts.
 
 Team members:
 1.Bhoopalsinh Musale	002269332

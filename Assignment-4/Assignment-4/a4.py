@@ -1,11 +1,13 @@
 from dipy.denoise.noise_estimate import estimate_sigma
 from dipy.denoise.nlmeans import nlmeans
+import nipype.interfaces.fsl as fsl
+import itk
+import SimpleITK as sitk
 import cv2
 import nibabel as nib
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
 import os
 import matplotlib.patches as patches
 from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -183,6 +185,55 @@ def part_2():
         plt.show()
 
 
+def vessel_segmentation(p, name):
+    ip_img = itk.imread(p, itk.F)
+    Img_type = type(ip_img)
+    size = ip_img.GetImageDimension()
+    # Hessian Pixel Type
+    Hessian_PType = itk.SymmetricSecondRankTensor[itk.D, size]
+    # Hessian Image Type
+    Hessian_IType = itk.Image[Hessian_PType, size]
+    Filter = itk.HessianToObjectnessMeasureImageFilter[Hessian_IType, Img_type].New(
+    )
+    Filter.SetBrightObject(True)
+    Filter.SetScaleObjectnessMeasure(True)
+    # Initial the threshoulds
+    Filter.SetAlpha(0.5)
+    Filter.SetBeta(1.0)
+    Filter.SetGamma(5.0)
+    # Filter.Set(abs(HIT))
+    # multi  nlm filter
+    multi_NLM_Filter = itk.MultiScaleHessianBasedMeasureImageFilter[Img_type, Hessian_IType, Img_type].New(
+    )
+    multi_NLM_Filter.SetInput(ip_img)
+    multi_NLM_Filter.SetHessianToMeasureFilter(Filter)
+    multi_NLM_Filter.SetSigmaStepMethodToLogarithmic()
+    val_min = 0.2
+    multi_NLM_Filter.SetSigmaMinimum(val_min)
+    val_max = 3.
+    multi_NLM_Filter.SetSigmaMaximum(val_max)
+    sStps = 8
+    multi_NLM_Filter.SetNumberOfSigmaSteps(sStps)
+
+    OP_Pixel = itk.UC
+    OP_Image = itk.Image[OP_Pixel, size]
+
+    multi_NLM_Filter2 = itk.RescaleIntensityImageFilter[Img_type, OP_Image].New(
+    )
+    multi_NLM_Filter2.SetInput(multi_NLM_Filter)
+    # Applying threshould filter
+    filter = itk.BinaryThresholdImageFilter[OP_Image, OP_Image].New()
+    filter.SetInput(multi_NLM_Filter2.GetOutput())
+    segment_threshold = 40
+    filter.SetLowerThreshold(segment_threshold)
+    filter.SetUpperThreshold(255)
+    filter.SetOutsideValue(0)
+    filter.SetInsideValue(255)
+
+    output_image = 'final_' + str(name)+'.mha'
+    itk.imwrite(filter.GetOutput(), output_image)
+
+
 def part_3():
 
     slice = 243
@@ -200,18 +251,6 @@ def part_3():
         btr.inputs.out_file = 'ss_tof.nii'
         res = btr.run()
 
-    epi_image = nib.load('tof.nii')
-    img = epi_image.get_data()
-    plt.subplot(2, 2, 1)
-    plt.imshow(img[slice, :, :].T, cmap='gray')
-    plt.title("Orginal tof.nii")
-
-    epi_image = nib.load('ss_tof.nii.gz')
-    img = epi_image.get_data()
-    plt.subplot(2, 2, 2)
-    plt.imshow(img[slice, :, :].T,  cmap='gray')
-    plt.title("Skull Stripped")
-
     # Skull Stripping of swi.nii
     if not os.path.exists('ss_swi.nii.gz'):
         btr = fsl.BET()
@@ -220,16 +259,32 @@ def part_3():
         btr.inputs.out_file = 'ss_swi.nii'
         res = btr.run()
 
+    epi_image = nib.load('tof.nii')
+    img = epi_image.get_data()
+    plt.subplot(1, 2, 1)
+    plt.imshow(img[slice, :, :].T, cmap='gray')
+    plt.title("Orginal tof.nii")
+
+    epi_image = nib.load('ss_tof.nii.gz')
+    img = epi_image.get_data()
+    plt.subplot(1, 2, 2)
+    plt.imshow(img[slice, :, :].T,  cmap='gray')
+    plt.title("Skull Stripped")
+
+    plt.draw()
+    plt.waitforbuttonpress(0)
+    plt.close()
+
     slice = 250
     epi_image = nib.load('swi.nii')
     img = epi_image.get_data()
-    plt.subplot(2, 2, 3)
+    plt.subplot(1, 2, 1)
     plt.imshow(np.flip(img[slice, :, :].T), cmap='gray')
     plt.title("Orginal swi.nii")
 
     epi_image = nib.load('ss_swi.nii.gz')
     img = epi_image.get_data()
-    plt.subplot(2, 2, 4)
+    plt.subplot(1, 2, 2)
     plt.imshow(np.flip(img[slice, :, :].T),  cmap='gray')
     plt.title("Skull Stripped")
 
@@ -253,11 +308,9 @@ def part_3():
     nifti_img = nib.Nifti1Image(clear_ss_swi_img, epi_image.affine)
     nib.save(nifti_img, "clear_ss_swi_img.nii.gz")
 
-    #############################################
-    #                                           #
-    #  Code for Segmenting arterial and venous  #
-    #                                           #
-    #############################################
+    # Vessel Segmentation of tof using itk and sitk
+    vessel_segmentation('clear_ss_tof_img.nii.gz', 'tof')
+    vessel_segmentation('clear_ss_swi_img.nii.gz', 'swi')
 
     os.chdir("..")
     print(os.system("pwd"))
